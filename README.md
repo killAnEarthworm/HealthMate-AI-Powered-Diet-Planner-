@@ -142,7 +142,7 @@ Healthoney——基于AIGC的糖尿病健康管理平台主要由以下七大模
 
 功能描述：数据展示功能用于实时展示用户的生理指标、饮食记录和运动情况。用户可以通过可视化图表直观了解自己的健康状态。
 
-使用流程：打开数据看板
+![dashboard.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7opoyAPMTuokRo4zhdTFP08wrEMMkgADJwAC84pBVnLnpC765W-4NgQ.png)
 
 ### 录入用户生理指标功能
 
@@ -152,34 +152,16 @@ Healthoney——基于AIGC的糖尿病健康管理平台主要由以下七大模
 
 1.  点击“录入每日生理指标”
 2.  输入要修改的生理指标，点击提交，数据更新成功。
-
-## 健康分析报告模块
-
-### XX功能
-
-_包含功能的描述、如何使用以及功能的截图。分步截图_
-
-### XX功能
-
-_包含功能的描述、如何使用以及功能的截图。分步截图_
-
-## 体重趋势预测模块
-
-### XX功能
-
-_包含功能的描述、如何使用以及功能的截图。分步截图_
-
-### XX功能
-
-_包含功能的描述、如何使用以及功能的截图。分步截图_
+![dashboard_insert.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7q5oyAQ6YR8KG5PyI8M7DheWvzWwkAACJCcAAvOKQVYkqC5A-NEqyzYE.png)
 
 ## 生成计划模块
+功能描述：自动获取已录入的生理指标构建提示词，生成定制化的饮食计划，可输入饮食偏好。
+![diet_generate.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7udoyATkacNELExhhWtynC4qHyBVLwACXScAAvOKQVZ96-vRavjKGjYE.png)
 
-### XX功能
+生成的计划可编辑，左侧可视化面板会自动计算当前计划的营养成分摄入状况
+![diet.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7sZoyASGVfYaZCzS2wzVBB7YrwhbxgACPCcAAvOKQVa_BuDfMFeCizYE.png)
 
-_包含功能的描述、如何使用以及功能的截图。分步截图_
 
-### XX功能
 
 ## 食物营养成分库模块
 
@@ -193,6 +175,7 @@ _包含功能的描述、如何使用以及功能的截图。分步截图_
 
 2.点击“查询”按钮，查询成功，数据显示在页面上。
 
+![database.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7yFoyAWXcdndtFqT0HJjXYrMNQW-EQACmScAAvOKQVZncrjKIr9MgjYE.png)
 ## 个人中心模块
 
 ### 用户档案管理功能
@@ -204,6 +187,7 @@ _包含功能的描述、如何使用以及功能的截图。分步截图_
 1.  点击用户档案
 2.  输入要修改的信息，点击保存，数据更新完成。
 
+![personal.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7yxoyAW8KqSWMOXmfwJqqMNEMLNoTQACpScAAvOKQVasBzt-QAzQLzYE.png)
 ### 修改密码功能
 
 #### 功能描述：用户可以通过此功能修改账户密码
@@ -234,6 +218,8 @@ _包含功能的描述、如何使用以及功能的截图。分步截图_
 1.  在输入框中输入邮箱账号和对应的密码。
 
 1.  点击“登陆按钮”，成功登陆，进入数据看板。
+
+![login.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7zloyAXlA9ZCr8Ta9WK-xlY9XtfD7wACsicAAvOKQVbpEj7j5vY-MTYE.png)
 
 ### 注册功能
 
