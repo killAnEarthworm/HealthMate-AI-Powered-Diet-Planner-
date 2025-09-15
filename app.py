@@ -1,5 +1,3 @@
-import os
-import sys
 from flask import Flask
 from flask_mail import Mail
 from blueprints.data_board_personal_center import data_board_personal_center_bp
