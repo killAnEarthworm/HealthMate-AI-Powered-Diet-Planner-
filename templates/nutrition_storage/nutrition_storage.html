@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+
+{% block title %}
+食物营养成分库
+{% endblock %}
+
+{% block content %}
+<div class="container" style="position: relative;">
+    <div class="row text-center mb-7">
+        <div class="col-md-8"> <!-- 调整宽度 -->
+            <div class="row">
+                <div class="col-md-4">
+                    <canvas id="caloriesChart" width="20" height="20"></canvas>
+                </div>
+                <div class="col-md-4">
+                    <canvas id="proteinChart" width="20" height="20"></canvas>
+                </div>
+                <div class="col-md-4">
+                    <canvas id="fatChart" width="20" height="20"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="position: relative;">
+        <div class="col-md-6 custom-width" style="margin-top: 10px;">
+            <div class="nutrition-results">
+                <div class="blood-pressure-inputs" id="nutritionResult">
+                    <div class="input-group">
+                        <label for="dietary_fiber">膳食纤维(g):</label>
+                        <input type="text" id="dietary_fiber" name="dietary_fiber" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="carotene">胡罗卜素(μg):</label>
+                        <input type="text" id="carotene" name="carotene" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="retinol">视黄醇单量(μg):</label>
+                        <input type="text" id="retinol" name="retinol" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="vitamin_b1">维生素b1(mg):</label>
+                        <input type="text" id="vitamin_b1" name="vitamin_b1" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="vitamin_b2">维生素b2(mg):</label>
+                        <input type="text" id="vitamin_b2" name="vitamin_b2" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="niacin">烟酸(mg):</label>
+                        <input type="text" id="niacin" name="niacin" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="vitamin_c">维生素c(mg):</label>
+                        <input type="text" id="vitamin_c" name="vitamin_c" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="vitamin_e">维生素e(mg):</label>
+                        <input type="text" id="vitamin_e" name="vitamin_e" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="vitamin_a">维生素a(μg):</label>
+                        <input type="text" id="vitamin_a" name="vitamin_a" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="cholesterol">胆固醇(g):</label>
+                        <input type="text" id="cholesterol" name="cholesterol" class="form-control" disabled>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 custom-width" style="margin-top: 10px;"> <!-- 添加间隙 -->
+            <div class="nutrition-results">
+                <div class="blood-pressure-inputs" id="anotherNutritionResult">
+                    <div class="input-group">
+                        <label for="carbohydrates">钙(mg):</label>
+                        <input type="text" id="carbohydrates" name="carbohydrates" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="potassium">钾(mg):</label>
+                        <input type="text" id="potassium" name="potassium" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="sodium">钠(mg):</label>
+                        <input type="text" id="sodium" name="sodium" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="magnesium">镁(mg):</label>
+                        <input type="text" id="magnesium" name="magnesium" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="iron">铁(mg):</label>
+                        <input type="text" id="iron" name="iron" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="manganese">锰(mg):</label>
+                        <input type="text" id="manganese" name="manganese" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="zinc">锌(mg):</label>
+                        <input type="text" id="zinc" name="zinc" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="copper">铜(mg):</label>
+                        <input type="text" id="copper" name="copper" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="phosphorus">磷(mg):</label>
+                        <input type="text" id="phosphorus" name="phosphorus" class="form-control" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="selenium">硒(μg):</label>
+                        <input type="text" id="selenium" name="selenium" class="form-control" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 fixed-card" style="bottom: 640px;">
+        <div class="card w-500">
+            <div class="card-body">
+                <form id="nutritionForm">
+                    <div class="form-group">
+                        <label for="foodCategory">食物种类</label>
+                        <select class="form-control" id="foodCategory" name="food_category" required>
+                            <option value="">选择种类</option>
+                            {% for category in categories %}
+                            <option value="{{category.category_id}}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="foodName">食品名称</label>
+                        <select class="form-control" id="foodName" name="food_name" required>
+                            <option value="">选择食品</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="quantity">食物数量（g）</label>
+                        <input class="form-control" id="quantity" name="quantity2" type="number" required>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary custom-btn">查询</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="transparent-box" style="margin-top: 20px;">
+        <img class="Rectangle" src="{{ url_for('static', filename='images/lf20_hcmanopl.json].png') }}"
+             alt="Animated Image"/>
+    </div>
+    <div class="transparent-box2" style="margin-top: 20px;">
+        <i class="bi bi-sun-fill" style="font-size: 50px;"></i>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+document.getElementById('foodCategory').addEventListener('change', function() {
+    const categoryId = this.value;  // 获取选中的类别ID
+    console.log(document.getElementById('foodCategory').value)
+    if (categoryId) {
+        // 立即发送 POST 请求到后端
+        fetch(`/nutrition_storage/foods/${categoryId}`)
+        .then(response => response.json())
+        .then(data => {
+            const foodNameSelect = document.getElementById('foodName');
+            foodNameSelect.innerHTML = '<option value="name">选择食品</option>';  // 清空选项
+
+            data.forEach(food => {
+                const option = document.createElement('option');
+                option.value = food.name;  // 使用食品ID作为值
+                option.textContent = food.name;  // 使用食品名称作为文本
+                foodNameSelect.appendChild(option);  // 添加选项到下拉框
+            });  // 关闭 forEach
+        })
+        .catch(error => console.error('Error fetching food names:', error));
+    }
+});
+function createPieChart(ctx, label, value) {
+    // 检查并销毁之前的图表实例
+        if (ctx.chart) {
+            ctx.chart.destroy();
+        }
+
+        const chart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: [label, '其他'],
+                datasets: [{
+                    data: [value, 100 - value],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(201, 203, 207, 0.2)'
+                    ],
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: label
+                    }
+                }
+            }
+        });
+        // 将图表实例保存到上下文
+    ctx.chart = chart;
+    }
+    // 获取后端计算数据
+window.onload = function() {
+
+    const initialKcal = 0;
+    const initialProtein = 0;
+    const initialFat = 0;
+
+    createPieChart(document.getElementById('caloriesChart').getContext('2d'), '热量 (kcal)', initialKcal);
+    createPieChart(document.getElementById('proteinChart').getContext('2d'), '蛋白质 (g)', initialProtein);
+    createPieChart(document.getElementById('fatChart').getContext('2d'), '脂肪 (g)', initialFat);
+
+    fetch('/calculate')  // 替换为你的后端接口地址
+        .then(response => response.json())
+        .then(data => {
+
+            const { kcal, protein, fat } = data;  // 确保后端返回的数据中有这些字段
+
+            // 创建三个扇形图
+            createPieChart(document.getElementById('caloriesChart').getContext('2d'), '热量 (kcal)', data.kcal);
+            createPieChart(document.getElementById('proteinChart').getContext('2d'), '蛋白质 (g)', data.protein);
+            createPieChart(document.getElementById('fatChart').getContext('2d'), '脂肪 (g)', data.fat);
+        })
+        .catch(error => console.error('Error fetching data:', error));
+};
+ $(document).ready(function() {
+    $('#nutritionForm').on('submit', function(e) {
+        e.preventDefault(); // 阻止表单默认提交
+        $.ajax({
+            type: 'POST',
+            url: '{{ url_for("nutrition_storage_login.calculate") }}',
+            data: $(this).serialize(),
+            success: function(response) {
+                // 更新结果显示区域
+                $('#kcal').val(response.kcal);
+                $('#protein').val(response.protein);
+                $('#fat').val(response.fat);
+
+                $('#carbohydrates').val(response.carbohydrates);
+                $('#dietary_fiber').val(response.dietary_fiber);
+                $('#carotene').val(response.carotene);
+                $('#retinol').val(response.retinol);
+                $('#vitamin_b1').val(response.vitamin_b1);
+                $('#vitamin_b2').val(response.vitamin_b2);
+                $('#niacin').val(response.niacin);
+                $('#vitamin_c').val(response.vitamin_c);
+                $('#vitamin_e').val(response.vitamin_e);
+                $('#vitamin_a').val(response.vitamin_a);
+                $('#cholesterol').val(response.cholesterol);
+                $('#potassium').val(response.potassium);
+                $('#sodium').val(response.sodium);
+                $('#magnesium').val(response.magnesium);
+                $('#iron').val(response.iron);
+                $('#manganese').val(response.manganese);
+                $('#zinc').val(response.zinc);
+                $('#copper').val(response.copper);
+                $('#phosphorus').val(response.phosphorus);
+                $('#selenium').val(response.selenium);
+                $('#carbohydrates').val(response.selenium);
+                // 更新扇形图
+                createPieChart(document.getElementById('caloriesChart').getContext('2d'), '热量 (kcal)', response.kcal);
+                createPieChart(document.getElementById('proteinChart').getContext('2d'), '蛋白质 (g)', response.protein);
+                createPieChart(document.getElementById('fatChart').getContext('2d'), '脂肪 (g)', response.fat);
+            },
+            error: function(xhr) {
+                alert(xhr.responseJSON.error); // 显示错误信息
+            }
+        });
+    });
+});
+
+
+
+</script>
+<style>
+        body {
+            position: relative;
+             height: 100vh;
+        }
+        .fixed-card {
+            position: relative; /* 保持相对定位 */
+            margin-left: auto; /* 自动左边距 */
+            margin-top: 0; /* 从顶部开始 */
+            width: 33%;
+            z-index: 1000;
+            float: right; /* 使容器靠右对齐 */
+        }
+        .nutrition-results {
+            margin-left: 20px;
+            padding: 20px; /* 添加内边距 */
+            background-color: #f8f9fa; /* 背景颜色 */
+            border-radius: 10px; /* 圆角边框 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 阴影效果 */
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        .custom-width {
+            position: relative;
+            margin-bottom: 20px;
+            max-width: 350px; /* 设置最大宽度 */
+            width: 100%; /* 确保在小屏幕上适应 */
+            margin: 0; /* 移除外边距 */
+            padding: 0; /* 移除内边距 */
+            margin-left: 15px;
+            top: 0px;
+        }
+        .custom-btn {
+            background-color: #22CB8E;
+            border-color: #22CB8E; /* 如果需要边框颜色一致 */
+        }
+
+        .custom-btn:hover {
+            background-color: #1ab27c; /* 可选：设置悬停时的颜色 */
+            border-color: #1ab27c; /* 可选：悬停时边框颜色 */
+        }
+
+    .transparent-box {
+        position: relative;
+        height: 100px;
+        max-width: 50px;
+        bottom: 350px; /* 距离下边缘 70px */
+        left: 780px; /* 距离右边缘 20px */
+    }
+
+    .transparent-box2 {
+        position: relative;s
+        height: 100px;
+        max-width: 50px;
+        bottom: 480px; /* 距离下边缘 20px */
+        left: 1000px; /* 距离右边缘 20px */
+        color: #FF5E00;
+    }
+
+
+
+</style>
+{% endblock %}
+

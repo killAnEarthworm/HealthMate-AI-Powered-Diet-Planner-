@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+
+{% block title %}个人中心{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-success">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="container mt-4">
+    <!-- 个人基本信息 -->
+    <div class="section personal-info">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>个人基本信息</h2>
+            <button type="submit" form="personalInfoForm" class="btn custom-save-btn">保存</button>
+        </div>
+        <form id="personalInfoForm" action="{{ url_for('data_board_personal_center.user_profile') }}" method="POST">
+            <div class="form-group row">
+                <div class="col-md-4 mb-3">
+                    <label for="username" class="form-label">用户名:</label>
+                    <input class="form-control custom-input" type="text" id="username" name="username" value="{{ user.username }}" placeholder="请输入用户名" aria-label="用户名输入框">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="email" class="form-label">邮箱:</label>
+                    <input type="email" class="form-control custom-input" id="email" name="email" value="{{ user.email }}"  placeholder="name@example.com">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="phone" class="form-label">电话号码:</label>
+                    <input type="tel" class="form-control custom-input" id="phone" name="phone" value="{{ user.phone_number }}" placeholder="123-456-7890">
+                </div>
+            </div>
+
+            <!-- 性别选择和出生日期 -->
+            <div class="form-group row mb-3">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label" for="gender">性别:</label>
+                    <div class="d-flex align-items-center">
+                        <div class="form-check me-4">
+                            <input class="form-check-input custom-radio" type="radio" name="gender" id="genderMale" value="male" {% if user.gender == 'male' %}checked{% endif %}>
+                            <label class="form-check-label" for="genderMale">男</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input custom-radio" type="radio" name="gender" id="genderFemale" value="female" {% if user.gender == 'female' %}checked{% endif %}>
+                            <label class="form-check-label" for="genderFemale">女</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="birthdate" class="form-label">出生日期:</label>
+                    <input type="date" class="form-control custom-input" id="birthdate" name="birthdate" value="{{ user.date_of_birth }}" placeholder="年/月/日">
+                </div>
+            </div>
+        </form>
+    </div>
+
+        <!-- 身体数据和健康状况 -->
+    <div class="section body-data-health">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>身体数据和健康状况</h2>
+            <button type="submit" form="bodyDataHealthForm" class="btn custom-save-btn">保存</button>
+        </div>
+        <form id="bodyDataHealthForm" action="{{ url_for('data_board_personal_center.user_profile') }}" method="POST">
+            <div class="d-flex justify-content-between">
+                <!-- 左侧内容 -->
+                <div class="left--content">
+                    <!-- 体重滑动条 -->
+                    <div class="form-group row mb-3">
+                        <label for="weightRange" class="form-label">体重 (kg):</label>
+                        <div class="d-flex align-items-center">
+                            <input type="range" class="form-range custom-range" id="weightRange" name="weightRange" min="30" max="150" step="1" value="{{ user_profile.weight }}" oninput="document.getElementById('weightValue').innerHTML = this.value + ' kg'">
+                            <span id="weightValue" class="ms-2 custom-range-value">{{ user_profile.weight }} kg</span>
+                        </div>
+                    </div>
+
+                    <!-- 身高滑动条 -->
+                    <div class="form-group row mb-3">
+                        <label for="heightRange" class="form-label">身高 (cm):</label>
+                        <div class="d-flex align-items-center">
+                            <input type="range" class="form-range custom-range" id="heightRange" name ="heightRange" min="140" max="210" step="1" value="{{ user_profile.height }}" oninput="document.getElementById('heightValue').innerHTML = this.value + ' cm'">
+                            <span id="heightValue" class="ms-2 custom-range-value">{{ user_profile.height }} cm</span>
+                        </div>
+                    </div>
+
+                    <!-- BMI 文本框 -->
+                    <div class="form-group row mb-3">
+                        <div class="col-md-8 mb-3">
+                            <label for="bmi" class="form-label">BMI:</label>
+                            <input type="number" class="form-control custom-input custom-bmi-input" id="bmi" name="bmi" placeholder="请输入BMI数值" aria-label="BMI输入框" step="0.1" min="0" max="50" value="{{ user_profile.bmi }}">
+                        </div>
+                    </div>
+                        <!-- 过敏史文本框 -->
+                    <div class="form-group row mb-3">
+                        <div class="col-md-8 mb-3">
+                            <label for="allergies" class="form-label">过敏史:</label>
+                            <input type="text" class="form-control custom-input custom-allergies-input" id="allergies" name="allergies" placeholder="请输入过敏史" value="{{ user_profile.allergies }}" aria-label="过敏史输入框">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧大文本框 -->
+                <div class="right--content">
+                    <div class="form-group mb-3">
+                        <label for="medicalHistory" class="form-label">既往病史:</label>
+                        <textarea class="form-control custom-textarea" id="medicalHistory" name="medicalHistory" placeholder="请输入既往病史" >{{ user_profile.medical_history }}</textarea>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="chronicConditions" class="form-label">慢性病状况:</label>
+                        <textarea class="form-control custom-textarea" id="chronicConditions" name="chronicConditions" placeholder="请输入慢性病状况">{{ user_profile.chronic_conditions }}</textarea>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="currentMedications" class="form-label">当前服用药物:</label>
+                        <textarea class="form-control custom-textarea" id="currentMedications" name="currentMedications" placeholder="请输入当前服用药物">{{ user_profile.medications }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <script>
+        function updateWeightValue(value) {
+            document.getElementById('weightValue').textContent = value + ' kg';
+        }
+    </script>
+
+    <!-- 生活习惯和偏好 -->
+    <div class="section lifestyle-preferences">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>生活习惯和偏好</h2>
+            <button type="submit" form="lifestylePreferencesForm" class="btn custom-save-btn">保存</button>
+        </div>
+        <form id="lifestylePreferencesForm" action="{{ url_for('data_board_personal_center.user_profile') }}" method="POST">
+            <!-- 吸烟状况 -->
+            <div class="form-group row mb-3">
+                <label class="form-label">吸烟状况:</label>
+                <div class="custom-radio-group">
+                    <div class="form-check">
+                        <input class="form-check-input custom-radio" type="radio" name="smokingStatus" id="neverSmoke" value="never"
+                               {{ 'checked' if user_profile.smoking_status == 'never' else '' }}>
+                        <label class="form-check-label" for="neverSmoke">从不</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input custom-radio" type="radio" name="smokingStatus" id="usedToSmoke" value="former"
+                               {{ 'checked' if user_profile.smoking_status == 'former' else '' }}>
+                        <label class="form-check-label" for="usedToSmoke">以前</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input custom-radio" type="radio" name="smokingStatus" id="currentlySmoke" value="current"
+                               {{ 'checked' if user_profile.smoking_status == 'current' else '' }}>
+                        <label class="form-check-label" for="currentlySmoke">现在</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 饮酒频率 -->
+            <div class="form-group row mb-3">
+                <label class="form-label">饮酒频率:</label>
+                <div class="custom-radio-group">
+                    <div class="form-check">
+                        <input class="form-check-input custom-radio" type="radio" name="alcoholConsumption" id="neverDrink" value="none"
+                               {{ 'checked' if user_profile.alcohol_consumption == 'none' else '' }}>
+                        <label class="form-check-label" for="neverDrink">无</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input custom-radio" type="radio" name="alcoholConsumption" id="lowDrink" value="low"
+                               {{ 'checked' if user_profile.alcohol_consumption == 'low' else '' }}>
+                        <label class="form-check-label" for="lowDrink">低</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input custom-radio" type="radio" name="alcoholConsumption" id="moderateDrink" value="moderate"
+                               {{ 'checked' if user_profile.alcohol_consumption == 'moderate' else '' }}>
+                        <label class="form-check-label" for="moderateDrink">中</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input custom-radio" type="radio" name="alcoholConsumption" id="highDrink" value="high"
+                               {{ 'checked' if user_profile.alcohol_consumption == 'high' else '' }}>
+                        <label class="form-check-label" for="highDrink">高</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 饮食偏好和运动偏好 -->
+            <div class="form-group row mb-3">
+                <div class="col-md-6">
+                    <label for="dietPreferences" class="form-label">饮食偏好:</label>
+                    <textarea class="form-control custom-textarea" id="dietPreferences" name="dietaryPreference" placeholder="请输入饮食偏好">{{ user_profile.dietary_preference }}</textarea>
+                </div>
+                <div class="col-md-6">
+                    <label for="exercisePreferences" class="form-label">运动偏好:</label>
+                    <textarea class="form-control custom-textarea" id="exercisePreferences" name="exercisePreference" placeholder="请输入运动偏好">{{ user_profile.exercise_preference }}</textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+    body {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .section {
+        background-color: #fff;
+        border-radius: 25px;
+        box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.03);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .section h2 {
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .custom-input {
+        border: 1px solid #198754;
+        border-radius: 4px;
+        padding: 10px;
+        transition: box-shadow 0.3s;
+        font-size: 16px;
+    }
+
+    .custom-input::placeholder {
+        color: #6c757d; /* 提示字颜色与其他输入框一致 */
+    }
+
+    .custom-input:focus {
+        box-shadow: 0px 0px 4px rgba(25, 135, 84, 0.5);
+        outline: none;
+    }
+
+    .form-label {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .custom-radio {
+        accent-color: #198754;
+        width: 20px;
+        height: 20px;
+    }
+
+    .form-check {
+        margin-right: 1rem;
+    }
+
+    .d-flex {
+        display: flex;
+        align-items: center;
+    }
+
+    .mb-3 {
+        margin-bottom: 1rem;
+    }
+
+    /* 保存按钮样式 */
+    .custom-save-btn {
+        background-color: #E9FAF4;
+        border: none;
+        padding: 5px 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .custom-save-btn:hover {
+        background-color: #d4f5e9; /* 添加悬停效果 */
+    }
+    .custom-range {
+        width: 80%; /* 控制滑动条长度为板块的一半还小一点 */
+        appearance: none;
+        height: 8px;
+        background-color: #198754;
+        border-radius: 5px;
+        outline: none;
+        transition: background 0.3s ease-in-out;
+    }
+
+    .custom-range::-webkit-slider-thumb {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: #fff;
+        border: 2px solid #198754;
+        cursor: pointer;
+        transition: background 0.3s ease-in-out;
+    }
+
+    .custom-range::-webkit-slider-thumb:hover {
+        background-color: #d4f5e9;
+    }
+
+    .custom-range-value {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 800; /* ExtraBold */
+        font-size: 20px;
+    }
+    .custom-bmi-input, .custom-allergies-input {
+        width: 90%; /* 控制宽度，使它们的宽度不超过体重条 */
+    }
+    .custom-textarea {
+        border: 1px solid #198754;
+        border-radius: 4px;
+        padding: 10px;
+        font-size: 16px;
+        resize: vertical; /* 允许垂直调整大小 */
+        width: 100%; /* 宽度适应容器 */
+        height: 70px; /* 固定高度 */
+    }
+
+    .left--content, .right--content {
+        width: 50%; /* 使左右内容占据一半宽度 */
+    }
+
+    .left--content {
+        padding-right: 20px; /* 给左侧内容一些右边距 */
+    }
+
+    .right--content {
+        padding-left: 20px; /* 给右侧内容一些左边距 */
+    }
+
+    .d-flex {
+        display: flex;
+        align-items: flex-start; /* 确保内容在顶部对齐 */
+        justify-content: space-between; /* 内容均匀分布 */
+    }
+
+    .form-group {
+        margin-bottom: 1rem; /* 确保文本框之间有合适的间距 */
+    }
+
+    .custom-radio-group {
+        display: flex;
+        gap: 2rem; /* 控制单选按钮之间的间距 */
+        width:20%; /* 设置宽度，可以根据需要调整 */
+    }
+
+    .custom-radio {
+        accent-color: #198754; /* 修改单选按钮颜色 */
+    }
+
+    .custom-radio-group {
+        display: flex;
+        gap: 1rem; /* 控制单选按钮之间的间距 */
+        width: 60%; /* 设置宽度，可以根据需要调整 */
+    }
+
+    .custom-radio {
+        accent-color: #198754; /* 修改单选按钮颜色 */
+    }
+
+    .custom-checkbox {
+    accent-color: #198754;
+    }
+
+</style>
+
+<script>
+    function submitForm(formId) {
+        var form = document.getElementById(formId);
+        if (form) {
+            form.submit(); // 提交表单
+        }
+    }
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,1 @@
+from .views import data_board_personal_center_bp

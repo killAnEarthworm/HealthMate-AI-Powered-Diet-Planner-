@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>圆角+渐变+半透明柱状图</title>
+  <style scoped>
+    .charts {
+      width: 700px;
+      height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <canvas id="ryvFfssSxVdgFsxbckYPbLAzyuUzETZp" class="charts"></canvas>
+  </div>
+</body>
+<script src="assets/js/u-charts.js"></script>
+<script language="JavaScript">
+var uChartsInstance = {};
+
+function showCharts(id,data){
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  uChartsInstance[id] = new uCharts({
+    type: "column",
+    context: ctx,
+    width: canvas.width,
+    height: canvas.height,
+    categories: data.categories,
+    series: data.series,
+    animation: true,
+    background: "#FFFFFF",
+    color: ["#34ECAA","#F9F2B0","#AFFFE2","#FFC107","#FFC107","#FFC107","#FFC107","#FFC107","#FFC107"],
+    padding: [15,15,0,5],
+    enableScroll: false,
+    legend: {},
+    xAxis: {
+      disableGrid: true,
+      rotateLabel: true,
+      marginTop:5
+    },
+    yAxis: {
+      data: [
+        {
+          min: 0
+        }
+      ]
+    },
+    extra: {
+      column: {
+        type: "group",
+        width: 6,
+        activeBgColor: "#000000",
+        activeBgOpacity: 0.08,
+        linearType: "custom",
+        seriesGap: 5,
+        linearOpacity: 0.5,
+        barBorderCircle: true,
+        customColor: [
+          "#6CE4FF",
+          "#FFC107"
+        ]
+      }
+    }
+  });
+  canvas.onclick = function(e) {
+    uChartsInstance[e.target.id].touchLegend(getH5Offset(e));
+    uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+  };
+  canvas.onmousemove=function(e) {
+    uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+  };
+}
+
+function getServerData() {
+  //模拟从服务器获取数据时的延时
+  setTimeout(() => {
+    //模拟服务器返回数据，如果数据格式和标准格式不同，需自行按下面的格式拼接
+    let res = {
+        categories: ["维生素A","胡萝卜素","视黄醇单量","维生素B1","维生素B2","烟酸","维生素C","维生素E","胆固醇","钾","钠","钙","镁",'铁','锰','锌','铜','磷',"硒"],
+        series: [
+          {
+            name: "目标值",
+            data: [35,36,31,33,13,34,57,36,24,77,15,36,55,58,64,25,48,19,72]
+          },
+          {
+            name: "完成量",
+            data: [18,27,21,24,16,28,22,53,65,26,10,40,50,40,26,20,19,20,69]
+          }
+        ]
+      };
+    showCharts('ryvFfssSxVdgFsxbckYPbLAzyuUzETZp', res);
+  }, 0);
+}
+
+getServerData();
+</script>
+</html>

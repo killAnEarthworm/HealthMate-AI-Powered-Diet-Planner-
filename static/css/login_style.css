@@ -1,0 +1,385 @@
+.main-container {
+    width: 100%;
+    height: 100%;
+    background: white;
+    flex: 1;
+    min-width: 100px; /* 你可以根据需要调整 */
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.Rectangle {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 450px;
+    top: 0px;
+    left: 0px;
+    position: absolute;
+}
+
+
+.AlreadyAMemberLogInCopy {
+    width: 400px;
+    height: 28px;
+    right: 91px;
+    top: 73px;
+    position: absolute;
+    text-align: center;
+    color: black;
+    font-size: 12.8px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 700;
+    line-height: 30px;
+    word-wrap: break-word;
+}
+
+.LogInToQpay {
+    width: 200px;
+    height: 28px;
+    left:40px;
+    top: 39px;
+    position: absolute;
+    text-align: center;
+    color: black;
+    font-size: 24px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 700;
+    line-height: 30px;
+    word-wrap: break-word;
+}
+
+.LogInToQpay2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    margin-top: 25px; /* 添加上边距 */
+}
+
+.LogInToQpay3 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    margin-top: 50px; /* 添加上边距 */
+}
+
+.BtnPryTemplate12 {
+    margin: 0;
+    padding: 0;
+    width: 130px; /* 固定宽度，避免占满页面 */
+    height: 48px;
+    position: relative; /* 改为相对定位 */
+    display: flex;
+    justify-content: flex-end; /* 让按钮靠右 */
+    align-items: flex-start; /* 让按钮靠上 */
+    float: right; /* 将元素浮动到右边 */
+    top: 0; /* 保持在页面的顶部 */
+    right: 0; /* 保持在页面的右边 */
+    margin-right: 20px; /* 给页面右边留一些间距 */
+    margin-top: 10px; /* 给页面顶部留一些间距 */
+}
+
+.full-width-button {
+    width: 100%; /* 按钮宽度充满父容器 */
+    height: 100%; /* 按钮高度充满父容器 */
+    border: 1px #41A480 solid;
+    background: rgba(255, 255, 255, 0); /* 保持透明背景 */
+    display: flex; /* 使用 flex 布局使文本居中 */
+    justify-content: center;
+    align-items: center;
+}
+
+.full-width-button2 {
+    width: 100%; /* 按钮宽度充满父容器 */
+    height: 100%; /* 按钮高度充满父容器 */
+    border: 1px #FAFF00 solid;
+    background: rgba(255, 255, 255, 0); /* 保持透明背景 */
+    display: flex; /* 使用 flex 布局使文本居中 */
+    justify-content: center;
+    align-items: center;
+}
+
+.col-12 col-md-6 custom-section {
+    width: 1600px;
+    height: 450px;
+}
+
+.Button {
+    width: 116px;
+    height: 40px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    background: rgba(255, 255, 255, 0);
+    border: 1px #41A480 solid;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    display: inline-flex;
+}
+
+.register {
+    color: #41A480;
+    font-size: 20px;
+    font-family: 'Zen Kaku Gothic Antique', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.70px;
+}
+
+
+
+.Rectangle2 {
+    width: 572px;
+    height: 430px;
+    position: relative; /* 从 absolute 改为 relative */
+    margin: 132px auto; /* 垂直居中，水平居中 */
+    background-color: #fff;
+    border: 1px solid #E0E0E0;
+    box-shadow: 0px 82px 40px -14px rgba(100, 100, 100, 0.08);
+}
+.Rectangle3 {
+    width: 572px;
+    height: 500px;
+    position: relative; /* 从 absolute 改为 relative */
+    margin: 132px auto; /* 垂直居中，水平居中 */
+    background-color: #fff;
+    border: 1px solid #E0E0E0;
+    box-shadow: 0px 82px 40px -14px rgba(100, 100, 100, 0.08);
+}
+
+
+.Group3 {
+    width: 380px;
+    height: 266.50px;
+    left: 96px;
+    top: 120.25px;
+    position: absolute;
+}
+
+.Group4 {
+    width: 380px;
+    height: 400.50px;
+    left: 96px;
+    top: 120.25px;
+    position: absolute;
+}
+
+.CheckboxLabel {
+    width: 120px;
+    height: 23px;
+    position: absolute;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 9px;
+    display: inline-flex;
+}
+
+.Checkbox {
+    width: 21.52px;
+    height: 22px;
+    position: relative;
+}
+
+.Terms {
+    color: #616161;
+    font-size: 11px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 400;
+    text-decoration: underline;
+    line-height: 22.53px;
+}
+
+.Terms2 {
+color: #616161;
+    font-size: 11px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 400;
+    text-decoration: underline;
+    line-height: 22.53px;
+}
+
+.Group {
+    width: 330.24px;
+    height: 46.72px;
+    left: 16.76px;
+    top: 11.90px;
+    position: absolute
+}
+
+.InputNameCopy3 .Rectangle {
+    width: 380px;
+    height: 68px;
+    position: absolute;
+    background: white;
+    border: 1px #E0E0E0 solid;
+}
+
+.ExIconEye {
+    width: 16px;
+    height: 16px;
+    left: 354px;
+    top: 26px;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    display: inline-flex;
+}
+
+.PasswordField {
+    width: 330.24px;
+    height: 28.16px;
+    color: #757575;
+    font-size: 16px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 400;
+    line-height: 28.16px;
+}
+
+.Password {
+    color: #616161;
+    font-size: 10.29px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 400;
+    line-height: 18.06px;
+}
+
+.InputName .Rectangle {
+    width: 380px;
+    height: 68px;
+    position: absolute;
+    background: white;
+    border: 1px #212121 solid;
+}
+
+.JohndoeExampleCom {
+    width: 330.24px;
+    height: 31.17px;
+    color: #616161;
+    font-size: 16px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 400;
+    line-height: 28.16px;
+}
+
+.EmailAddress {
+    color: #424242;
+    font-size: 10.29px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 400;
+    line-height: 18.06px;
+}
+
+.BtnPryTemplate2 {
+     width: 380px;
+     height: 60px;
+     padding-top: 17.50px;
+     padding-bottom: 17.50px;
+     left: 0px; top: 180.50px;
+     position: absolute;
+     background: #22CB8E;
+     justify-content: center;
+     align-items: center;
+     display: inline-flex
+}
+
+.Proceed {
+    text-align: center;
+    color: white;
+    font-size: 16px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 400;
+    line-height: 28.16px;
+    word-wrap: break-word
+}
+
+.ForgotPassword {
+    left: 822px;
+    top: 421px;
+    position: absolute;
+    text-align: right;
+    color: #616161;
+    font-size: 11px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 400;
+    text-decoration: underline;
+    line-height: 22.53px;
+}
+
+.LogInToHealthoney {
+    width: 380px;
+    left: 530px;
+    top: 164.50px;
+    position: absolute;
+    text-align: center;
+    color: black;
+    font-size: 31.25px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 700;
+    line-height: 37.50px;
+}
+
+.AlreadyAMember {
+    left: 549px;
+    top: 206px;
+    position: absolute;
+    color: #757575;
+    font-size: 12.80px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 400;
+}
+
+.OrUse {
+    left: 697.50px;
+    top: 558px;
+    position: absolute;
+    text-align: center;
+    color: black;
+    font-size: 12.80px;
+    font-family: Zen Kaku Gothic Antique;
+    font-weight: 400;
+    line-height: 22.53px;
+}
+
+.Github {
+    width: 36px;
+    height: 37px;
+    padding-bottom: 0.91px;
+    left: 46px;
+    top: 35px;
+    position: absolute;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    display: inline-flex;
+}
+
+.AlreadyAMemberLogInCopy, .custom-text {
+    color: #757575;
+    font-family: 'Zen Kaku Gothic Antique', sans-serif;
+    font-size: 12.8px;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.form-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.custom-button {
+    width: 380px;
+    height: 60px;
+    background-color: #22CB8E;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+

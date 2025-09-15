@@ -1,0 +1,855 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  数据看板
+{% endblock %}
+
+{% block content %}
+
+
+<div class="dashboard-wrapper">
+    <div id="alertBox" style="display: none;" class="alert">
+        <span id="alertMessage"></span>
+    </div>
+    <div class="hi">
+        <span class="greeting">你好！欢迎使用数据看板</span>
+    </div>
+    <div class="header">
+        <button id="openFormButton">录入每日生理指标</button>
+    </div>
+
+    <div class="form-popup" id="formPopup">
+      <div class="form-content">
+        <span class="close" id="closeFormButton">&times;</span>
+        <h3 id="formTitle">生理指标录入</h3>
+        <form method="POST" action="{{ url_for('data_board_personal_center.data_board') }}">
+            <label for="measurementDate">测量日期:</label>
+            <input type="date" id="measurementDate" name="measurementDate" value="{{ latest_record.measurement_date if latest_record else '' }}" required>
+            <br>
+            <div class="blood-pressure1">
+                <label class="blood-pressure-label">血压</label>
+                <div class="blood-pressure-inputs">
+                    <div class="input-group">
+                        <label for="systolicPressure">舒张压(mmhg):</label>
+                        <input type="number" id="systolicPressure" name="systolicPressure" value="{{ latest_record.blood_pressure_sys if latest_record else '' }}" required step="0.1" style="border-radius: 5px;">
+                    </div>
+                    <div class="input-group">
+                        <label for="diastolicPressure">收缩压(mmhg):</label>
+                        <input type="number" id="diastolicPressure" name="diastolicPressure" value="{{ latest_record.blood_pressure_dia if latest_record else '' }}" required step="0.1" style="border-radius: 5px;">
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="blood-pressure2">
+                <label class="blood-pressure-label">血糖</label>
+                <div class="blood-pressure-inputs">
+                    <div class="input-group">
+                        <label for="randomBloodSugar">随机血糖(mmol/L):</label>
+                        <input type="number" id="randomBloodSugar" name="randomBloodSugar" value="{{ latest_record.random_blood_glucose if latest_record else '' }}" required step="0.1" style="border-radius: 5px;">
+                    </div>
+                    <div class="input-group">
+                        <label for="hba1c">糖氧化血红蛋白(%):</label>
+                        <input type="number" id="hba1c" name="hba1c" value="{{ latest_record.glycated_hemoglobin if latest_record else '' }}" required step="0.1" style="border-radius: 5px;">
+                    </div>
+                </div>
+            </div>
+            <br>
+
+                <div class="flex-row">
+                  <div class="input-group">
+                    <label for="bloodUricAcid"  style="  font-family: 'Montserrat', ExtraBold; font-weight: 800;   font-size: 20px; ">血尿酸:</label>
+                    <input type="number" id="bloodUricAcid" name="bloodUricAcid" value="{{ latest_record.uric_acid if latest_record else '' }}" class="input-style " style="border-radius: 5px; ">
+                  </div>
+                  <div class="input-group">
+                    <label for="bloodSaturation"  style="  font-family: 'Montserrat', ExtraBold; font-weight: 800;font-size: 20px; ">血氧饱和度:</label>
+                    <input type="number" id="bloodSaturation" name="bloodSaturation" value="{{ latest_record.oxygen_saturation if latest_record else '' }}" class="input-style " style="border-radius: 5px;">
+                  </div>
+                </div>
+                <div class="flex-row">
+                  <div class="input-group">
+                    <label for="height"  style="  font-family: 'Montserrat', ExtraBold;  font-weight: 800; font-size: 20px; ">身高(m):</label>
+                    <input type="number" id="height" name="height" value="{{ latest_record.height if latest_record else '' }}" required step="0.01" class="input-style" style="border-radius: 5px;">
+                  </div>
+                  <div class="input-group">
+                    <label for="weight"  style="  font-family: 'Montserrat',ExtraBold;  font-weight: 800; font-size: 20px; ">体重(kg):</label>
+                    <input type="number" id="weight" name="weight" value="{{ latest_record.weight if latest_record else '' }}" required step="0.1" class="input-style" style="border-radius: 5px;">
+                  </div>
+                </div>
+            <div class="lipid-profile">
+                <label class="lipid-label">血脂指标</label>
+                <div class="lipid-inputs">
+                    <div class="input-group">
+                        <label for="totalCholesterol">总胆固醇(mmol/L):</label>
+                        <input type="number" id="totalCholesterol" name="totalCholesterol" value="{{ latest_record.total_cholesterol if latest_record else '' }}" required step="0.1" class="input-style" style="border-radius: 5px;">
+                    </div>
+                    <div class="input-group">
+                        <label for="triglycerides">甘油三酯(mmol/L):</label>
+                        <input type="number" id="triglycerides" name="triglycerides" value="{{ latest_record.triglycerides if latest_record else '' }}" required step="0.1" class="input-style" style="border-radius: 5px;">
+                    </div>
+                    <div class="input-group">
+                        <label for="hdlCholesterol">高密度脂蛋白胆固醇(mmol/L):</label>
+                        <input type="number" id="hdlCholesterol" name="hdlCholesterol" value="{{ latest_record.hdl_cholesterol if latest_record else '' }}" required step="0.1" class="input-style" style="border-radius: 5px;">
+                    </div>
+                    <div class="input-group">
+                        <label for="ldlCholesterol">低密度脂蛋白胆固醇(mmol/L):</label>
+                        <input type="number" id="ldlCholesterol" name="ldlCholesterol" value="{{ latest_record.ldl_cholesterol if latest_record else '' }}" required step="0.1" class="input-style" style="border-radius: 5px;">
+                    </div>
+                </div>
+            </div>
+            <br>
+            <input type="submit" class="submit-button" value="提交">
+        </form>
+      </div>
+    </div>
+
+
+    <div class="overlay" id="overlay"></div>
+
+
+    <div class="dashboard-container">
+        <div class="left-panel">
+          <div class="panel blood-pressure">
+            <h2>血压</h2>
+            <p style="font-size: 15px; margin: 0;">单位：mmHg</p> <!-- 添加单位 -->
+            <div>
+              <canvas id="bloodPressureChart" class="charts" style="width: 100%; height: 200px;"></canvas>
+            </div>
+          </div>
+
+          <div class="panel blood-saturation">
+            <h2>血氧饱和度</h2>
+            <div style="text-align: center;"> <!-- 添加这个 div 来居中 -->
+              <canvas id="bloodSaturationChart" class="charts" style="width: 50%; height: 150px;"></canvas>
+            </div>
+
+          </div>
+
+
+          <div class="panel blood-uric-acid">
+            <h2>血尿酸</h2>
+            <p style="font-size: 15px; margin: 0;">单位：µmol/L</p> <!-- 添加单位 -->
+            <div>
+              <canvas id="uricAcidChart" class="charts" style="width: 100%; height: 200px;"></canvas>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="right-panel">
+          <div class="panel blood-glucose">
+            <h2>血糖</h2>
+            <div>
+              <canvas id="bloodGlucoseChart" class="charts" style="width: 90%; height: 370px;"></canvas>
+            </div>
+          </div>
+
+          <div class="panel blood-lipid">
+            <h2>血脂</h2>
+              <p style="font-size: 15px; margin: 0;">单位：mmol/L</p> <!-- 添加单位 -->
+            <div>
+              <canvas id="cholesterolChart" class="charts" style="width: 80%; height: 300px;"></canvas>
+            </div>
+          </div>
+        </div>
+    </div>
+
+
+  </div>
+<style>
+.alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* 居中 */
+    background-color: #E9FAF4; /* 背景颜色 */
+    color: #0C847A; /* 字体颜色 */
+    padding: 15px;
+    border-radius: 5px;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+    opacity: 1;
+    font-size: 18px;
+}
+.greeting {
+  font-size: 24px; /* 字体大小 */
+  font-weight: bold; /* 加粗 */
+  color: #0C847A; /* 字体颜色 */
+}
+.hi {
+  margin-right: 10px; /* 按钮左边距 */
+  margin-top: 20px; /* 向下偏移 */
+}
+
+
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -30px; /* 调整按钮与上方内容的间距 */
+}
+
+#openFormButton {
+  padding: 10px 15px;
+  background-color: #22CB8E; /* 按钮颜色 */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.dashboard-wrapper {
+  position: relative; /* 使弹出框相对这个容器定位 */
+  width: 100%; /* 可以根据需要调整宽度 */
+  max-width: 1200px; /* 限制最大宽度 */
+  margin: 0 auto; /* 居中显示 */
+}
+
+.form-popup {
+  display: none; /* 默认隐藏 */
+  position: absolute; /* 相对大容器定位 */
+  left: 0; /* 从左侧开始 */
+  top: 0;
+  width: calc(33.33%); /* 当前页面内容的三分之一 */
+  height: 100%;
+  background-color: #FFFFFF; /* 填充白色 */
+  border-top-right-radius: 25px; /* 右上角圆角 */
+  border-bottom-right-radius: 25px; /* 右下角圆角 */
+  z-index: 1000; /* 确保在最上层 */
+  box-shadow: none; /* 移除阴影 */
+}
+
+.overlay {
+  display: none; /* 默认隐藏 */
+  position: absolute; /* 相对大容器定位 */
+  top: 0;
+  left: 0;
+  width: 100%; /* 覆盖大容器 */
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.2); /* 半透明黑色 */
+  z-index: 900; /* 比弹出框低 */
+}
+
+#formTitle {
+  font-family: 'Roboto', sans-serif; /* 设置字体 */
+  font-weight: 400; /* regular */
+  font-size: 25px; /* 字体大小 */
+  text-align: center; /* 文字居中 */
+  margin: 0; /* 去掉默认边距 */
+}
+
+label {
+  font-family: 'Montserrat', sans-serif; /* 设置标签字体 */
+  font-weight: 800; /* extrabold */
+  font-size: 20px; /* 字体大小 */
+  margin-top: 10px; /* 标签上边距 */
+}
+
+input[type="date"],
+input[type="text"],
+input[type="number"] {
+  width: calc(100% - 20px); /* 使文本框适应 */
+  padding: 10px; /* 内边距 */
+  margin-top: 5px; /* 上边距 */
+  border-radius: 5px;
+  border: 2px solid #198754; /* 边框颜色 */
+  height: 35px; /* 设置文本框高度 */
+}
+
+input[type="date"]:focus,
+input[type="text"]:focus,
+input[type="number"]:focus {
+  box-shadow: 0px 0px 0px 4px rgba(25, 135, 84, 0.50); /* 点击后阴影效果 */
+  outline: none; /* 移除默认的焦点轮廓 */
+}
+
+.blood-pressure1 {
+  margin-top: 10px; /* 血压组的上边距 */
+}
+.blood-pressure2 {
+  margin-top: -20px; /* 血压组的上边距 */
+  margin-bottom: -20px;
+}
+
+.blood-pressure-label {
+  font-family: 'Montserrat', sans-serif; /* 字体 */
+  font-weight: 800; /* regular */
+  font-size: 20px; /* 字体大小 */
+  margin-top: 10px; /* 上边距 */
+}
+
+.blood-pressure-inputs {
+  display: flex; /* 使用 Flexbox 布局 */
+  justify-content: space-between; /* 在行内均匀分配空间 */
+  margin-top: 5px; /* 上边距 */
+}
+
+.input-group {
+  flex: 1; /* 每个输入组占据相等空间 */
+  margin-right: 10px; /* 右边距，避免重叠 */
+}
+
+.flex-row {
+  display: flex;
+
+}
+
+
+
+.input-group:last-child {
+  margin-right: 0; /* 最后一个输入组不需要右边距 */
+}
+
+.input-group label {
+  font-family: 'Montserrat', sans-serif; /* 标签字体 */
+  font-weight: normal; /* regular */
+  font-size: 15px; /* 字体大小 */
+  margin-right: 5px; /* 标签和文本框之间的间距 */
+}
+.lipid-profile {
+  margin-top: 10px; /* 控制血脂指标模块与上方内容的间距 */
+}
+
+.lipid-label {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+.lipid-inputs {
+  display: flex;
+  flex-direction: column; /* 垂直排列输入框 */
+  gap: 10px; /* 输入框之间的间距 */
+}
+
+.input-group {
+  display: flex;
+  justify-content: space-between;
+}
+
+.input-group label {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: normal;
+  font-size: 15px;
+  margin-right: 5px;
+}
+
+.submit-button {
+  padding: 10px 15px; /* 内边距 */
+  background-color: #22CB8E; /* 按钮颜色 */
+  color: white; /* 字体颜色 */
+  border: none; /* 去掉边框 */
+  border-radius: 5px; /* 圆角 */
+  cursor: pointer; /* 鼠标悬停时为手型 */
+  margin: 20px auto; /* 上边距和左右自动，居中显示 */
+  display: block; /* 使按钮成为块级元素，支持 margin: auto */
+  width: 80%; /* 设置按钮宽度 */
+  max-width: 100px; /* 最大宽度限制 */
+}
+
+
+
+
+
+
+
+
+
+.form-content {
+  padding: 20px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+
+
+
+
+
+  .dashboard-container {
+    display: flex;
+    gap: 20px; /* 左右面板间距 */
+  }
+
+  .left-panel {
+    flex: 0.4; /* 左侧面板占30%宽度 */
+  }
+
+  .right-panel {
+    flex: 0.6; /* 右侧面板占70%宽度 */
+  }
+
+  .panel {
+    border-radius: 25px;
+    background: var(--, #FFF);
+    box-shadow: 0px 6px 18px 0px rgba(0, 0, 0, 0.03);
+    margin-bottom: 20px; /* 板块间距 */
+    padding: 20px; /* 内边距 */
+  }
+
+  h2 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    font-size: 25px;
+  }
+</style>
+
+<script>
+document.getElementById('openFormButton').onclick = function() {
+  document.getElementById('formPopup').style.display = 'flex';
+}
+
+document.getElementById('closeFormButton').onclick = function() {
+  document.getElementById('formPopup').style.display = 'none';
+}
+
+// 点击弹出框外部时关闭
+window.onclick = function(event) {
+  if (event.target === document.getElementById('formPopup')) {
+    document.getElementById('formPopup').style.display = 'none';
+  }
+}
+
+
+  document.getElementById("openFormButton").addEventListener("click", function() {
+  document.getElementById("formPopup").style.display = "block";
+  document.getElementById("overlay").style.display = "block";
+
+  // 禁用背景图表交互
+  const charts = document.querySelectorAll(".charts");
+  charts.forEach(chart => {
+    chart.style.pointerEvents = "none"; // 禁用交互
+  });
+});
+
+document.getElementById("closeFormButton").addEventListener("click", function() {
+  document.getElementById("formPopup").style.display = "none";
+  document.getElementById("overlay").style.display = "none";
+
+  // 恢复背景图表交互
+  const charts = document.querySelectorAll(".charts");
+  charts.forEach(chart => {
+    chart.style.pointerEvents = "auto"; // 恢复交互
+  });
+});
+
+</script>
+
+
+
+
+
+<script src="{{ url_for('static', filename='assets/js/u-charts.js') }}"></script>
+<script language="JavaScript">
+var uChartsInstance = {};
+<!--血压-->
+  function showBloodPressureChart(data) {
+    const canvas = document.getElementById('bloodPressureChart');
+    const ctx = canvas.getContext("2d");
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    uChartsInstance['bloodPressureChart'] = new uCharts({
+      type: "line",
+      context: ctx,
+      width: canvas.width,
+      height: canvas.height,
+      categories: data.categories,
+      series: data.series,
+      animation: true,
+      background: "#FFFFFF",
+      color: ["#0C847A", "#22CB8E"],
+      padding: [15, 10, 0, 15],
+      dataLabel: false,
+      dataPointShape: false,
+      enableScroll: false,
+      legend: {},
+      xAxis: {
+        disableGrid: true
+      },
+      yAxis: {
+        gridType: "dash",
+        dashLength: 2,
+        data: [{ min: 0, max: 150 }]
+      },
+      extra: {
+        line: {
+          type: "curve",
+          width: 2,
+          activeType: "hollow",
+          linearType: "custom",
+          onShadow: true,
+          animation: "horizontal"
+        }
+      }
+    });
+    canvas.onclick = function(e) {
+      uChartsInstance[e.target.id].touchLegend(getH5Offset(e));
+      uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+    };
+    canvas.onmousemove = function(e) {
+      uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+    };
+  }
+
+  function getBloodPressureData() {
+    fetch('/api/blood_pressure_data')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('网络响应不是 OK');
+        }
+        return response.json();
+      })
+      .then(data => {
+        showBloodPressureChart(data);
+      })
+      .catch(error => {
+        console.error('获取数据失败:', error);
+      });
+  }
+
+  window.onload = function() {
+    getBloodPressureData();
+  };
+
+<!--血饱和度-->
+function showBloodSaturationChart(data) {
+  const canvas = document.getElementById('bloodSaturationChart');
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  uChartsInstance['bloodSaturationChart'] = new uCharts({
+    type: "arcbar",
+    context: ctx,
+    width: canvas.width,
+    height: canvas.height,
+    series: data.series,
+    animation: true,
+    background: "#FFFFFF",
+    color: ["#1890FF"],
+    padding: undefined,
+    subtitle: {
+      name: (data.series[0].data * 100).toFixed(0) + "%", // 动态设置为实际血饱和度
+      fontSize: 25,
+      color: "#000000",
+      fontFamily: "Roboto",
+      fontWeight: "bold"
+    },
+    extra: {
+      arcbar: {
+        type: "default",
+        width: 15,
+        backgroundColor: "#E9E9E9",
+        startAngle: 0.75,
+        endAngle: 0.25,
+        gap: 2,
+        linearType: "custom"
+      }
+    }
+  });
+}
+
+function getBloodSaturationData() {
+  fetch('/api/blood_saturation_data')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('网络响应不是 OK');
+      }
+      return response.json();
+    })
+    .then(data => {
+      showBloodSaturationChart(data);
+    })
+    .catch(error => {
+      console.error('获取数据失败:', error);
+    });
+}
+
+// 在页面加载时调用
+window.onload = function() {
+  getBloodSaturationData();
+};
+
+function showUricAcidChart(data) {
+  const canvas = document.getElementById('uricAcidChart');
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  uChartsInstance['uricAcidChart'] = new uCharts({
+    type: "line",
+    context: ctx,
+    width: canvas.width,
+    height: canvas.height,
+    categories: data.categories,
+    series: [
+      {
+        name: "尿酸",
+        data: data.series[0].data, // 假设数据在这里
+        linearColor: [
+          [0, "#FA8BFF"],
+          [0.52, "#2BD2FF"],
+          [0.90, "#2BFF88"]
+        ],
+      }
+    ],
+    animation: true,
+    background: "#FFFFFF",
+    padding: [15, 10, 0, 15],
+    dataLabel: false,
+    dataPointShape: false,
+    enableScroll: false,
+    legend: {},
+    xAxis: {
+      disableGrid: true
+    },
+    yAxis: {
+      gridType: "dash",
+      dashLength: 2,
+      data: [{
+        min: 100,
+        max: 500
+      }]
+    },
+    extra: {
+      line: {
+        type: "curve",
+        width: 2,
+        activeType: "hollow",
+        linearType: "custom",
+        onShadow: true,
+        animation: "horizontal"
+      }
+    }
+  });
+
+  canvas.onclick = function(e) {
+    uChartsInstance[e.target.id].touchLegend(getH5Offset(e));
+    uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+  };
+
+  canvas.onmousemove = function(e) {
+    uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+  };
+}
+
+function getUricAcidData() {
+  fetch('/api/uric_acid_data')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('网络响应不是 OK');
+      }
+      return response.json();
+    })
+    .then(data => {
+      showUricAcidChart(data);
+    })
+    .catch(error => {
+      console.error('获取数据失败:', error);
+    });
+}
+
+// 在页面加载时调用
+window.onload = function() {
+  getUricAcidData();
+};
+
+
+<!--血糖-->
+function showCharts(id, data) {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  // 创建渐变颜色
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, "rgba(250, 139, 255, 0.7)"); // 起始颜色，透明度为0.7
+  gradient.addColorStop(0.52, "rgba(43, 210, 255, 0.7)"); // 中间颜色，透明度为0.7
+  gradient.addColorStop(0.9, "rgba(43, 255, 136, 0.7)"); // 结束颜色，透明度为0.7
+
+  uChartsInstance[id] = new uCharts({
+    type: "mix",
+    context: ctx,
+    width: canvas.width,
+    height: canvas.height,
+    categories: data.categories,
+    series: data.series,
+    animation: true,
+    background: "#FFFFFF",
+    color: [gradient], // 修改颜色
+    padding: [15, 15, 0, 15],
+    enableScroll: false,
+    legend: {},
+    xAxis: {
+      disableGrid: true
+    },
+    yAxis: {
+      disabled: false,
+      disableGrid: false,
+      splitNumber: 5,
+      gridType: "dash",
+      dashLength: 4,
+      gridColor: "#CCCCCC",
+      padding: 10,
+      showTitle: true,
+      data: [
+        {
+          position: "left",
+          title: "血糖",
+          min: 5, // 血糖最小值
+          max: 10  // 血糖最大值
+        },
+        {
+          position: "right",
+          min: 0,
+          max: 10,
+          title: "糖氧化血红蛋白",
+          textAlign: "left"
+        }
+      ]
+    },
+    extra: {
+      mix: {
+        column: {
+          width: 30,
+          barBorderCircle: true
+        }
+      }
+    }
+  });
+
+  canvas.onclick = function(e) {
+    uChartsInstance[e.target.id].touchLegend(getH5Offset(e));
+    uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+  };
+
+  canvas.onmousemove = function(e) {
+    uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+  };
+}
+
+function getServerData() {
+  // 从服务器获取数据
+  fetch('/api/blood_glucose_data')
+    .then(response => response.json())
+    .then(data => {
+      showCharts('bloodGlucoseChart', data);
+    })
+    .catch(error => console.error('Error fetching data:', error));
+}
+
+// 初始化图表数据
+document.addEventListener('DOMContentLoaded', function() {
+  getServerData();
+});
+
+
+// 渲染血脂图表
+function renderCholesterolChart(id, data) {
+  const canvas = document.getElementById(id);
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  uChartsInstance[id] = new uCharts({
+    type: "bar",
+    context: ctx,
+    width: canvas.width,
+    height: canvas.height,
+    categories: data.categories,
+    series: data.series,
+    animation: true,
+    background: "#FFFFFF",
+    color: ["#1890FF"],
+    padding: [15, 30, 0, 5],
+    enableScroll: false,
+    legend: {},
+    xAxis: {
+      boundaryGap: "justify",
+      disableGrid: false,
+      min: 0,
+      axisLine: false,
+      max: 8 // 设置最大值范围
+    },
+    yAxis: {},
+    extra: {
+      bar: {
+        type: "group",
+        width: 30,
+        meterBorde: 1,
+        meterFillColor: "#FFFFFF",
+        activeBgColor: "#000000",
+        activeBgOpacity: 0.08,
+        linearType: "custom",
+        barBorderCircle: true,
+        seriesGap: 2,
+        categoryGap: 2
+      }
+    }
+  });
+
+  // 处理点击和鼠标移动事件
+  canvas.onclick = function(e) {
+    uChartsInstance[e.target.id].touchLegend(getH5Offset(e));
+    uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+  };
+  canvas.onmousemove = function(e) {
+    uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+  };
+}
+
+// 从服务器获取血脂数据
+function getloadCholesterolData() {
+  fetch('/api/cholesterol_data')
+    .then(response => response.json())
+    .then(data => {
+      renderCholesterolChart('cholesterolChart', data);
+    })
+    .catch(error => console.error('Error fetching data:', error));
+}
+
+// 页面加载时调用获取数据函数
+document.addEventListener('DOMContentLoaded', function() {
+  getloadCholesterolData();
+});
+
+
+// 初始化图表
+getBloodPressureData();
+getBloodSaturationData();
+getUricAcidData();
+getServerData();
+getloadCholesterolData();
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const alertBox = document.getElementById('alertBox');
+        const alertMessage = document.getElementById('alertMessage');
+
+        // 从后端获取闪现消息
+        const message = "{{ get_flashed_messages()[0] if get_flashed_messages() else '' }}";
+        if (message) {
+            alertMessage.textContent = message;
+            alertBox.style.display = 'block';
+
+            // 2秒后自动消失
+            setTimeout(() => {
+                alertBox.style.opacity = '0';
+                setTimeout(() => {
+                    alertBox.style.display = 'none';
+                }, 500); // 等待过渡结束后隐藏
+            }, 2000);
+        }
+    });
+</script>
+{% endblock %}
+
+
+
+

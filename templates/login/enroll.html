@@ -1,0 +1,91 @@
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
+      xmlns="http://www.w3.org/1999/html">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-icons/font/bootstrap-icons.css') }}">
+<title>注册</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login_style.css') }}">
+<div class="main-container">
+    <img class="Rectangle" src="{{ url_for('static', filename='images/Rectangle2.png') }}"/>
+
+    <div class="BtnPryTemplate12">
+        <a href="{{ url_for('nutrition_storage_login.login') }}">
+            <button type="button" class="btn btn-outline-success full-width-button2">
+                <div class="register" style="color: #FAFF00;">返回</div>
+            </button>
+        </a>
+    </div>
+
+    <div class="LogInToQpay">
+        <i class="bi bi-heart-pulse"></i> Healthoney
+    </div>
+    <div class="Rectangle3">
+        <div class="LogInToQpay3">注册</div>
+
+        <div class="Group4">
+            <form id="registerForm" method="POST" action="{{ url_for('nutrition_storage_login.enroll') }}">
+                <div class="form-group"
+                     style="color: #757575;font-family: Zen Kaku Gothic Antique;font-size: 12.8px;font-style: normal;font-weight: 400;line-height: normal;">
+                    <label for="formGroupExampleInput">邮箱地址</label>
+                    <input type="text" class="form-control" id="formGroupExampleInput" name="email"
+                           placeholder="请输入您的邮箱">
+                </div>
+
+                <div class="form-group"
+                     style="color: #757575;font-family: Zen Kaku Gothic Antique;font-size: 12.8px;font-style: normal;font-weight: 400;line-height: normal;">
+                    <label for="exampleInputPassword1">密码</label>
+                    <input type="password" class="form-control" id="exampleInputPassword1" name="passwd"
+                           placeholder="请输入您的密码">
+                </div>
+                <div class="form-group"
+                     style="color: #757575;font-family: Zen Kaku Gothic Antique;font-size: 12.8px;font-style: normal;font-weight: 400;line-height: normal;">
+                    <label for="formGroupExampleInput">验证码</label>
+                    <input type="text" class="form-control" id="formGroupExampleInput3" name="captcha"
+                           placeholder="请输入验证码">
+                </div>
+
+                <div class="form-container" style="display: flex;">
+                    <button type="button" id="sendCaptcha" class="stretched-link">发送验证码</button>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg custom-button">
+                    <div class="Proceed">
+                        注册
+                    </div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+<script>
+ $(document).ready(function() {
+    $('#sendCaptcha').on('click', function(e) {
+        e.preventDefault(); // 防止按钮的默认行为
+
+        const email = $('#formGroupExampleInput').val(); // 获取用户输入的邮箱
+
+        if (!email) {
+            alert('请输入有效的邮箱地址！');
+            return;
+        }
+
+        $.ajax({
+            url: '/mail_test',  // 发送请求到 Flask 后端的路由
+            method: 'POST',     // 确保与 Flask 路由匹配
+            data: { email: email },  // 确保这里传递了 email 参数
+            success: function(response) {
+                alert(response);  // 处理成功响应，显示返回的信息
+            },
+            error: function(xhr, status, error) {
+                alert('发送失败，请稍后再试。');
+            }
+        });
+    });
+});
+</script>
+<style>
+
+.custom-section {
+    width: 1600px;
+    height: 600px;
+}
+</style>

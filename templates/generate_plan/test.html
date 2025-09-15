@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Generate Plan</title>
+</head>
+<body>
+    <h1>Diet Plan</h1>
+    <div id="breakfast" class="dish-frame"></div>
+    <div id="lunch" class="dish-frame"></div>
+    <div id="dinner" class="dish-frame"></div>
+    <div id="snack" class="dish-frame"></div>
+
+    <button id="edit-btn" class="btn btn-dark">编辑</button>
+
+    <script>
+        var menuData = {{ menu_data | tojson }};
+        console.log(menuData);  // 调试信息，确保 menuData 正确传递
+
+        // 初始化菜单
+        function initMenu() {
+            const mealTypes = ["breakfast", "lunch", "dinner", "snack"];
+            mealTypes.forEach(meal => {
+                console.log(`Processing meal: ${meal}`);  // 调试信息
+                const dishFrame = document.getElementById(meal).querySelector('.dish-frame');
+                console.log(`Dish frame for ${meal}:`, dishFrame);  // 调试信息
+
+                const recommendedDishes = menuData.menu[meal];
+                console.log(`Recommended dishes for ${meal}:`, recommendedDishes);  // 调试信息
+
+                if (recommendedDishes) {
+                    recommendedDishes.forEach(dish => {
+                        console.log(`Creating select element for dish: ${dish}`);  // 调试信息
+                        const selectContainer = createSelectElement(dish);
+                        console.log(`Select container for ${dish}:`, selectContainer);  // 调试信息
+                        selectContainer.querySelector('select').disabled = true; // Disable by default
+                        dishFrame.appendChild(selectContainer);
+                    });
+                }
+            });
+        }
+
+        // 编辑按钮点击事件
+        document.getElementById('edit-btn').addEventListener('click', function() {
+            const editBtn = document.getElementById('edit-btn');
+            const selects = document.querySelectorAll('.form-select');
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+
+            // Toggle between 'btn-dark' and 'btn-outline-dark'
+            if (editBtn.classList.contains('btn-dark')) {
+                // 切换到编辑状态
+                editBtn.classList.remove('btn-dark');
+                editBtn.classList.add('btn-outline-dark');
+
+                // 启用所有 select
+                selects.forEach(select => select.disabled = false);
+
+                // 显示删除按钮
+                deleteButtons.forEach(button => {
+                    const associatedSelect = button.previousElementSibling;
+                    if (associatedSelect.value !== '') {
+                        button.style.display = 'inline-block'; // Show delete button only for non-empty selects
+                    }
+                });
+
+                // 在每个 dishFrame 的末尾添加一个新的 select 和删除按钮
+                const dishFrames = document.querySelectorAll('.dish-frame');
+                dishFrames.forEach(dishFrame => {
+                    const lastSelect = dishFrame.querySelector('.select-container:last-child select');
+                    if (lastSelect && lastSelect.value === '') {
+                        // 如果最后一个 select 是空的，则不再添加新的
+                        return;
+                    }
+
+                    // 添加一个新的 select 容器
+                    const newSelectContainer = createSelectElement();
+                    newSelectContainer.querySelector('select').disabled = false; // Enable immediately
+                    dishFrame.appendChild(newSelectContainer);
+                });
+            } else {
+                // 切换到禁用状态
+                editBtn.classList.remove('btn-outline-dark');
+                editBtn.classList.add('btn-dark');
+
+                // 禁用所有 select 并隐藏删除按钮
+                selects.forEach(select => select.disabled = true);
+                deleteButtons.forEach(button => button.style.display = 'none');
+
+                // 删除所有空的 select
+                const dishFrames = document.querySelectorAll('.dish-frame');
+                dishFrames.forEach(dishFrame => {
+                    const emptySelects = dishFrame.querySelectorAll('select');
+                    emptySelects.forEach(select => {
+                        if (select.value === '') {
+                            select.parentElement.remove();  // Remove the select container
+                        }
+                    });
+                });
+            }
+        });
+
+        // 创建 select 和 delete button 的组合容器
+        function createSelectElement(selectedValue) {
+            // 创建一个容器 div，用来存放 select 和 deleteBtn
+            const containerDiv = document.createElement('div');
+            containerDiv.classList.add('select-container');
+            containerDiv.style.display = 'flex';
+            containerDiv.style.alignItems = 'center';
+            containerDiv.style.gap = '10px'; // 给 select 和 deleteBtn 一点间距
+            containerDiv.style.width = '90%'
+
+            // 创建 select 元素
+            const select = document.createElement('select');
+            select.classList.add('form-select');
+            select.innerHTML = `<option value="">请选择</option>`;
+
+            // 动态生成 select 选项
+            console.log(menuData.options);  // 调试信息，确保 options 存在
+            menuData.options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                if (selectedValue === option) {
+                    optionElement.selected = true;
+                }
+                select.appendChild(optionElement);
+            });
+
+            // 监听 select 的 change 事件
+            select.addEventListener('change', function() {
+                if (select.value !== '') {
+                    // 只在最后一个 select 由空变为非空时添加新的 select
+                    if (!hasEmptySelect(select.parentElement.parentElement)) {
+                        addNewSelect(select.parentElement.parentElement);  // 添加到 dishFrame
+                    }
+
+                    const deleteBtn = select.nextElementSibling;
+                    if (deleteBtn) {
+                        deleteBtn.style.display = 'inline-block'; // 只有在非空 select 才显示删除按钮
+                    }
+                }
+            });
+
+            const deleteBtn = createDeleteButton(containerDiv);
+            deleteBtn.style.display = 'none'; // 默认隐藏删除按钮
+
+            // 将 select 和 deleteBtn 放入容器
+            containerDiv.appendChild(select);
+            containerDiv.appendChild(deleteBtn);
+
+            return containerDiv;
+        }
+
+        // 添加删除按钮
+        function createDeleteButton(containerDiv) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm', 'delete-btn');
+            deleteBtn.textContent = '—';
+
+            // 删除整个容器，包括 select 和按钮
+            deleteBtn.addEventListener('click', function() {
+                containerDiv.parentElement.removeChild(containerDiv);
+            });
+
+            return deleteBtn;
+        }
+
+        // 添加一个空的 select 元素
+        function addNewSelect(dishFrame) {
+            const newSelectContainer = createSelectElement("");
+            dishFrame.appendChild(newSelectContainer);
+        }
+
+        // 判断是否有空的 select
+        function hasEmptySelect(dishFrame) {
+            const selects = dishFrame.querySelectorAll('select');
+            for (let select of selects) {
+                if (select.value === '') {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 初始化页面
+        initMenu();
+    </script>
+</body>
+</html>

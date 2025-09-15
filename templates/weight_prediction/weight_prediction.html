@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  体重趋势预测
+{% endblock %}
+
+{% block content %}
+
+<div class="main-container">
+  <!-- 左侧部分 -->
+  <div class="left-content">
+    <!-- 体重趋势面板 -->
+    <div class="panel weight-trend">
+      <h2>体重趋势预测</h2>
+      <canvas id="weightTrendChart" width="600" height="300" style="border: 1px "></canvas>
+    </div>
+
+    <!-- 包装 frame1_2 和 frame3 的容器，使用 flex 布局使它们横向排列 -->
+    <div class="frame-container">
+      <!-- frame1_2，包含 frame1 和 frame2 -->
+      <div class="frame1_2">
+        <div class="frame1">
+          <h4 class="text1"><b>体重趋势分析</b></h4>
+          <p class="text2">当前体重：{{ latest_data.weight }} kg<br>目标体重：68 kg<br>预测时间范围：未来 3 个月</p>
+        </div>
+
+        <div class="frame2">
+          <h4 class="text1"><b>体重预警</b></h4>
+          <p class="text2">警告：若未来体重下降超过 2.5 kg/月，可能对健康产生负面影响，请适当调整饮食或咨询医生</p>
+<!--          <p id="prediction-result"></p>-->
+        </div>
+      </div>
+
+      <!-- frame3 在右侧对齐 frame1 -->
+      <div class="frame3">
+        <h4 class="text1"><b>预测摘要</b></h4>
+        <p class="text2">过去1个月的变化：体重稳定下降，共减少了 1.5 kg。<br>未来1个月预测：如果保持当前的饮食和运动习惯，预计体重将进一步减少 1.2 kg，达到 70.8 kg。<br>3个月后的预测：按照当前趋势，您的体重有望降至 68 kg，达成您的目标体重</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 右侧部分 -->
+  <div class="decorate">
+    <div class="image-container">
+      <img src="{{ url_for('static', filename='images/robot.png') }}" alt="Robot Image" class="robot-img">
+    </div>
+
+    <div class="text3-container">
+      <p class="text3">
+        在体重趋势预测功能中，我们使用的大语言模型通过分析用户的历史体重数据、健康档案以及生活习惯，结合多种健康预测算法，智能生成个性化的体重趋势预测。
+   该模型能够识别用户体重变化的潜在规律，预测未来的体重变化，并结合个体的健康目标，提供饮食、运动等方面的建议。通过不断优化模型算法，我们可以为用户提供更精准、个性化的健康管理方案，帮助用户科学控制体重并改善生活质量。
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- 引入 uCharts 库 -->
+<script src="{{ url_for('static', filename='assets/js/u-charts.js') }}"></script>
+
+<!-- JavaScript 脚本部分 -->
+<script>
+  var uChartsInstance = {};
+
+  // 用于展示体重趋势图表的函数
+  function showWeightTrendChart(data) {
+    const canvas = document.getElementById('weightTrendChart'); // 获取 canvas 元素
+    if (!canvas) {
+      console.error('Canvas element not found!'); // Debug: 检查 canvas 是否找到
+      return;
+    }
+
+    const ctx = canvas.getContext("2d"); // 获取绘图上下文
+    if (!ctx) {
+      console.error('Context not found!'); // Debug: 检查 canvas 上下文是否获取成功
+      return;
+    }
+
+    // 默认数据，用于处理没有数据时显示轮廓
+    const defaultData = {
+      categories: ['暂无数据'], // X 轴分类为暂无数据
+      series: [{
+        name: '体重',
+        data: [0] // 数据集为空
+      }]
+    };
+
+    // 如果传入的数据为空或无效，使用默认数据
+    if (!data || !data.categories || !data.series || data.series.length === 0) {
+      console.warn('No valid data found, using default data.');
+      data = defaultData;
+    }
+
+    // 创建 uCharts 实例
+    uChartsInstance['weightTrendChart'] = new uCharts({
+      type: "line", // 图表类型为折线图
+      context: ctx, // 绘制上下文
+      width: canvas.width, // 宽度
+      height: canvas.height, // 高度
+      categories: data.categories, // X 轴分类（时间或日期）
+      series: data.series, // 数据集
+      animation: true, // 启用动画效果
+      background: "#FFFFFF", // 背景颜色
+      color: ["#22CB8E"], // 数据线颜色
+      padding: [15, 15, 0, 15], // 图表边距
+      enableScroll: false, // 禁用滚动
+      legend: {}, // 图例配置
+      xAxis: {
+        disableGrid: true // 禁用 X 轴网格
+      },
+      yAxis: {
+        gridType: "dash", // Y 轴网格线为虚线
+        dashLength: 2 // 虚线长度
+      },
+      extra: {
+        line: {
+          type: "curve", // 折线图的线条类型为曲线
+          width: 2, // 线条宽度
+          activeType: "hollow", // 活动点为空心圆
+          animation: "horizontal" // 动画类型为水平
+        }
+      }
+    });
+
+    // 绑定鼠标点击事件，显示提示信息
+    canvas.onclick = function(e) {
+      uChartsInstance[e.target.id].touchLegend(getH5Offset(e));
+      uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+    };
+
+    // 绑定鼠标移动事件，显示提示信息
+    canvas.onmousemove = function(e) {
+      uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+    };
+  }
+
+  // 页面加载时绘制图表
+  window.onload = function() {
+    const futurePredictions = {{ future_predictions|tojson }};
+    const categories = futurePredictions.map((_, index) => `Day ${index + 1}`);
+    const series = [{
+        name: '体重',
+        data: futurePredictions
+    }];
+    showWeightTrendChart({ categories, series });
+};
+  document.addEventListener('DOMContentLoaded', function() {
+    // 点击图片时触发体重预测
+    document.querySelector('.image-container').addEventListener('click', function() {
+      fetch('/predict_weight', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            // 更新页面上的预测结果
+            const predictionResult = document.querySelector('#prediction-result');
+            if (predictionResult) {
+<!--                predictionResult.textContent = '预测结果：' + data.future_predictions.join(', ') + ' kg';-->
+            }
+            // 重新绘制图表
+            const futurePredictions = data.future_predictions;
+            const categories = futurePredictions.map((_, index) => `Day ${index + 1}`);
+            const series = [{
+                name: '体重',
+                data: futurePredictions
+            }];
+            showWeightTrendChart({ categories, series });
+        })
+        .catch(error => {
+            console.error('体重预测失败:', error);
+        });
+});
+  });
+</script>
+
+<!-- 样式部分 -->
+<style>
+.main-container {
+  display: flex; /* 使用 flex 布局，使左侧的 panel + frame 和右侧的 image-container 并排 */
+  justify-content: space-between; /* 左右均匀分布 */
+  width: 80vw; /* 占据整个屏幕宽度 */
+}
+
+/* 左侧部分，占 66.67% 宽度，包含 panel 和 frame1_2 */
+.left-content {
+  width: 66.67vw; /* 左侧部分占屏幕的三分之二 */
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 控制 panel 和 frame 的间距 */
+}
+
+/* 包装 frame1_2 和 frame3 的容器，使用 flex 横向排列 */
+  .frame-container {
+    display: flex;
+    justify-content: flex-start;
+    gap: 70px; /* 控制 frame1_2 和 frame3 的横向间距 */
+  }
+
+  .frame1_2 {
+    display: flex;
+    flex-direction: column; /* 使 frame1 和 frame2 垂直排列 */
+    gap: 29px;
+  }
+
+  .frame1, .frame2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 272px; /* 固定宽度 */
+  }
+
+  .frame3 {
+    width: 237px;
+    height: 189px;
+    flex-shrink: 0;
+  }
+
+  /* 调整文字样式 */
+  .text1 {
+    color: var(--Black_S, #0C0B0B);
+    font-family: Montserrat;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 120% */
+  }
+
+  .text2 {
+    color: var(--, #000);
+    font-family: Abel;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; /* 24px */
+  }
+
+  /* 右侧的图片部分 */
+  .decorate {
+    width: 33.33vw; /* 右侧部分占屏幕的三分之一宽度 */
+    display: flex;
+    justify-content: space-evenly; /* 在右侧部分水平居中排列 */
+    align-items: flex-start; /* 垂直靠上对齐 */
+    flex-direction: column; /* 使图片和文字垂直排列 */
+  }
+
+  .image-container {
+    width: 324px;
+    height: 370px;
+    flex-shrink: 0;
+    border-radius: 60px;
+    align-items: flex-start; /* 垂直靠上对齐 */
+    margin-bottom: 30px; /* 添加底部间距，让图片和文本容器之间有间隙 */
+    margin-left: 0px; /* 微调向中间靠拢 */
+    cursor: pointer; /* 鼠标悬停时显示点击手势 */
+  }
+
+  .robot-img {
+    max-width: 100%; /* 确保图片不会超过容器宽度 */
+    height: auto; /* 维持图片比例 */
+  }
+
+  .text3-container {
+    display: flex;
+    width: 258px;
+    height: 484px;
+    flex-direction: column;
+    align-items: center; /* 将文本容器水平居中 */
+    flex-shrink: 0;
+    background: #E9FAF4; /* 直接指定背景颜色 */
+    margin-left: 30px; /* 微调向中间靠拢 */
+  }
+
+  .text3 {
+    color: #0C847A; /* 直接指定文本颜色 */
+    font-family: Abel;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; /* 30px */
+    align-self: stretch;
+  }
+
+
+</style>
+{% endblock %}

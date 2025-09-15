@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  健康分析报告
+{% endblock %}
+
+{% block content %}
+<!--  <h1>Dashboard</h1>-->
+<!--  <p>This is the main content for the dashboard page.</p>-->
+
+<div class="container">
+  <div class="report">
+    <div class="report-container">
+      <h1 class="health-title">健康分析报告</h1>
+      <div class="health-container" id="health-report-container" style="display: none;">
+    <div class="health-report">
+        <h4 class="re-title1">健康状况</h4>
+        <p class="report-text1">{{ health_report.health_status if health_report else '数据未找到' }}</p>
+    </div>
+</div>
+<div class="dangerous-container" id="dangerous-report-container" style="display: none;">
+    <h4 class="re-title3">健康风险</h4>
+    <p class="dangreous-text1">{{ health_report.health_risks if health_report else '数据未找到' }}</p>
+    <h4 class="re-title4">危险因素</h4>
+    <p class="dangreous-text2">{{ health_report.risk_factors if health_report else '数据未找到' }}</p>
+</div>
+    </div>
+  </div>
+
+
+  <div class="decorate">
+
+    <div class="image-container" onclick="handleClick()">
+       <img src="{{ url_for('static', filename='images/click.png') }}" alt="Click Image" class="click-img"></img>
+      <h2 class="click-title">点击生成报告</h2>
+    </div>
+
+          <!-- 加载提示 -->
+    <div class="loading" style="display:none;">
+      <p>正在加载数据...</p>
+    </div>
+
+    <div class="warning">
+      <p class="warning-text">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <g clip-path="url(#clip0_473_9648)">
+            <path d="M15.9995 7.99902C15.9995 10.1208 15.1567 12.1556 13.6564 13.6559C12.1561 15.1562 10.1212 15.999 7.99951 15.999C5.87778 15.999 3.84295 15.1562 2.34266 13.6559C0.842367 12.1556 -0.000488281 10.1208 -0.000488281 7.99902C-0.000488281 5.87729 0.842367 3.84246 2.34266 2.34217C3.84295 0.841878 5.87778 -0.000976562 7.99951 -0.000976562C10.1212 -0.000976562 12.1561 0.841878 13.6564 2.34217C15.1567 3.84246 15.9995 5.87729 15.9995 7.99902ZM12.0295 4.96902C11.9581 4.89784 11.873 4.8418 11.7794 4.80424C11.6859 4.76668 11.5857 4.74838 11.4848 4.75044C11.384 4.75249 11.2846 4.77485 11.1927 4.81619C11.1007 4.85753 11.018 4.91699 10.9495 4.99102L7.47651 9.41602L5.38351 7.32202C5.24134 7.18954 5.05329 7.11742 4.85899 7.12085C4.66469 7.12428 4.4793 7.20299 4.34189 7.3404C4.20448 7.47781 4.12576 7.6632 4.12234 7.8575C4.11891 8.0518 4.19103 8.23985 4.32351 8.38202L6.96951 11.029C7.04079 11.1002 7.12568 11.1562 7.2191 11.1939C7.31252 11.2315 7.41256 11.2499 7.51326 11.2481C7.61396 11.2462 7.71325 11.2241 7.80521 11.183C7.89717 11.1419 7.97992 11.0828 8.04851 11.009L12.0405 6.01902C12.1766 5.87752 12.2518 5.6883 12.2499 5.49198C12.248 5.29566 12.1693 5.10791 12.0305 4.96902H12.0295Z" fill="#842029"/>
+          </g>
+          <defs>
+            <clipPath id="clip0_473_9648">
+              <rect width="16" height="16" fill="white"/>
+            </clipPath>
+          </defs>
+        </svg>
+        本产品仅供参考，若有不适请及时就医
+      </p>
+    </div>
+
+    <div class="history">
+      <div class="history-container">
+        <div class="history-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="31" height="31" viewBox="0 0 31 31" fill="none">
+            <path d="M8.20671 25.0459C10.1782 27.2546 12.7724 28.6291 15.5472 28.9351C18.322 29.2411 21.1056 28.4597 23.4237 26.7241C25.7419 24.9885 27.451 22.406 28.26 19.4168C29.0689 16.4276 28.9276 13.2166 27.86 10.3311C26.7925 7.44559 24.8648 5.06405 22.4055 3.59237C19.9462 2.12068 17.1074 1.64991 14.373 2.26028C11.6386 2.87065 9.17766 4.52439 7.40968 6.93968C5.6417 9.35498 4.67603 12.3824 4.67725 15.5059V18.4999" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 15.5L4.67789 18.5L7.35579 15.5M15.3895 9.5V17H22.0842" stroke="black" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <b>History</b>
+        </div>
+      </div>
+
+          <div class="col-md-4">
+<!--            <label for="birthdate" class="form-label"></label>-->
+            <input type="date" class="form-control custom-input" id="birthdate" placeholder="年/月/日">
+          </div>
+      </div>
+        <div class="download">
+      <p class="pdf">PDF下载</p>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    function handleClick() {
+    // 显示加载提示
+    document.querySelector('.loading').style.display = 'block';
+
+    // 请求后端接口，获取健康报告数据
+    fetch('/get_health_analysis')
+        .then(response => response.json())
+        .then(data => {
+            // 更新页面内容
+            document.querySelector('.report-text1').innerText = data.health_status || '数据未找到';
+            document.querySelector('.dangreous-text1').innerText = data.health_risks || '数据未找到';
+            document.querySelector('.dangreous-text2').innerText = data.risk_factors || '数据未找到';
+
+            // 显示健康报告部分
+            document.getElementById('health-report-container').style.display = 'block';
+            document.getElementById('dangerous-report-container').style.display = 'block';
+
+            // 隐藏加载提示
+            document.querySelector('.loading').style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            document.querySelector('.loading').style.display = 'none';  // 隐藏加载提示
+        });
+}
+</script>
+
+<style>
+  .container {
+    display: flex;
+      width: 80vw; /* 确保容器占满整个视口宽度 */
+    height: 100vh; /* 确保容器占满整个视口高度 */
+  }
+
+  .report {
+    display: flex;
+    justify-content: flex-start; /* 水平靠左 */
+    align-items: flex-start; /* 垂直靠左 */
+    height: 100vh; /* 高度占满整个视口 */
+    width: 60vw; /* 宽度占屏幕的50% */
+  }
+
+  .decorate {
+    width: 40vw; /* 右侧部分占屏幕的50%宽度 */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* 垂直靠上对齐 */
+    display: grid;
+
+  }
+
+  .report-container {
+    border-radius: 20px;
+    border: 1px solid #FFF;
+    background: #E9FAF4;
+    width: 100%; /* 占父容器宽度的100% */
+    height: 100%; /* 占据父容器的100%高度 */
+    flex-shrink: 0;
+    padding: 20px;
+  }
+
+  .health-container,
+  .dangerous-container {
+    border-radius: 20px;
+    background: #FFF;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    width: 80%; /* 占父容器宽度的80% */
+    height: 40%; /* 高度占父容器的40% */
+    flex-shrink: 0;
+    margin-bottom: 20px;
+    padding: 20px; /* 根据需要调整数值 */
+
+  }
+
+ .image-container {
+    width: 324px;
+    height: 399px;
+    flex-shrink: 0;
+    border-radius: 60px;
+    background: #EEE;
+    border: 10px solid #EEE;
+    align-items: flex-start; /* 垂直靠上对齐 */
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    cursor: pointer; /* 鼠标悬停时显示点击手势 */
+  }
+
+  .click-img {
+    max-width: 100%; /* 确保图片不会超过容器宽度 */
+    height: auto; /* 维持图片比例 */
+  }
+
+  .click-title {
+    color: #0C847A; /* 文本颜色 */
+    font-family: Poppins; /* 字体 */
+    font-size: 32px; /* 字体大小 */
+    font-style: normal; /* 字体样式，正常 */
+    font-weight: 400; /* 字体粗细 */
+    line-height: normal; /* 行高，使用正常的行高 */
+    text-align: center;
+    border: 50px solid #EEE;
+  }
+
+  .warning {
+    width: 337px; /* 固定宽度 */
+    padding: 10px;
+    align-items: flex-start;
+    border-radius: 4px;
+    border: 1px solid #F5C2C7;
+    background: #F8D7DA;
+    margin-top: 16px; /* 添加顶部间距，使其与图片之间有空间 */
+  }
+
+  .warning-text {
+    color: var(--Components-Alert-Danger-Text, #842029); /* 文本颜色可以通过 CSS 变量指定，默认颜色为 #842029 */
+    font-family: Abel; /* 字体设为 Abel，确保在项目中已经包含此字体 */
+    font-size: 16px; /* 字体大小为 16px */
+    font-style: normal; /* 字体样式设为正常 */
+    font-weight: 400; /* 字体粗细为 400（正常） */
+    line-height: 150%; /* 行高设为 150%，即 24px */
+    align-self: stretch; /* 如果包含在 Flexbox 容器中，设置为 stretch 会使文本容器在交叉轴方向上伸展填满父容器 */
+  }
+
+<!--  .history{-->
+<!--    -->
+<!--  }-->
+
+  .history-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* 使文本开始从顶部排列 */
+    padding-top: 10px; /* 添加顶部内边距，使文本向下移动 */
+    border-radius: 10px;
+    border: 1px solid var(--border-color, #000);
+    background: rgba(0, 0, 0, 0.00);
+    width: 159px;
+    height: 63px;
+    flex-shrink: 0;
+  }
+
+  .history-text {
+    color: var(--, #000);
+    font-family: Aleo;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: 0.2px;
+    text-align: center;
+  }
+
+  .date {
+    border-radius: 4px;
+    border: 1px solid var(--Gray-400, #CED4DA);
+    background: var(--, #FFF);
+    display: flex;
+    width: 290px;
+    padding: 7px 13px;
+    flex-direction: row; /* 水平排列内容 */
+    align-items: center; /* 垂直方向上居中 */
+    justify-content: space-between; /* 左右分布内容 */
+  }
+
+  .date-container{
+    display: flex;
+    align-items: center;
+    flex: 1 0 0;
+  }
+
+  .date-text{
+    color: var(--Gray-600, #6C757D);
+    font-family: Abel;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%; /* 30px */
+  }
+
+  .download{
+    display: flex;
+    width: 133px;
+    height: 54px;
+    padding: 8px 16px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    border-radius: 4.8px;
+    border: 1px solid #426B1F;
+    background: #0C847A;
+
+    }
+
+  .download:hover {
+    background-color: #0A7065; /* 按钮悬停时变色 */
+    cursor: pointer;
+  }
+
+  .pdf {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 水平居中 */
+    align-items: center; /* 垂直居中 */
+    background: rgba(255, 255, 255, 0.00); /* 背景透明 */
+    color: #FFFFFF; /* 设置字体颜色为白色 */
+    padding-top: 15px;
+  }
+
+  .custom-input {
+            width: 300px; /* 设置固定宽度 */
+            border: 2px solid #ced4da;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            transition: border-color 0.3s;
+        }
+
+        .custom-input:focus {
+            border-color: #80bdff;
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.25);
+        }
+
+  .re-title1,
+  .re-title2,
+  .re-title3,
+  .re-title4{
+    color: var(--Black_S, #0C0B0B);
+    font-family: Montserrat;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px; /* 120% */
+  }
+
+
+</style>
+
+
+
+{% endblock %}

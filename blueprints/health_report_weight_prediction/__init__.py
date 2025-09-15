@@ -1,0 +1,1 @@
+from .views import health_report_weight_prediction_bp

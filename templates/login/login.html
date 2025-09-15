@@ -1,0 +1,96 @@
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<title>Login Page</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login_style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-icons/font/bootstrap-icons.css') }}">
+<script src="https://code.jquery.com/jquery.js"></script>
+<div class="main-container">
+    <img class="Rectangle" src="{{ url_for('static', filename='images/Rectangle.png') }}"/>
+
+    <div class="BtnPryTemplate12">
+        <a href="{{ url_for('nutrition_storage_login.enroll') }}">
+            <button type="button" class="btn btn-outline-success full-width-button">
+                <div class="register">注册</div>
+            </button>
+        </a>
+    </div>
+
+    <div class="LogInToQpay">
+        <i class="bi bi-heart-pulse"></i> Healthoney
+    </div>
+    <div class="Rectangle2">
+        <div class="LogInToQpay2">登陆 Healthoney</div>
+        <div class="AlreadyAMemberLogInCopy">
+            Healthoney<span> & 健康的生活方式 预防慢性疾病</span>
+        </div>
+
+
+        <div class="Group3">
+            <form method="POST" action="{{ url_for('nutrition_storage_login.login') }}">
+                <div class="form-group custom-text">
+                    <label for="formGroupExampleInput">邮箱地址</label>
+                    <input type="text" class="form-control" id="formGroupExampleInput" name="email"
+                           placeholder="请输入邮箱">
+                </div>
+                <div class="form-group custom-text">
+                    <label for="exampleInputPassword1">密码</label>
+                    <input type="password" class="form-control" id="exampleInputPassword1" name="passwd"
+                           placeholder="请输入密码">
+                </div>
+                <div class="form-container">
+                    <div class="form-group form-check" style="margin-right: 180px;">
+                        <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                        <label class="Terms2" for="exampleCheck1">记住我</label>
+                    </div>
+                    <div class="Terms2">
+                        <a href="{{ url_for('nutrition_storage_login.enroll') }}" class="stretched-link">忘记密码?</a>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg custom-button">
+                    <div class="Proceed">登陆</div>
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- 登录失败提示框 -->
+    <div id="login-alert" class="alert alert-danger" role="alert" style="display: none;">
+        登录失败，请重试。
+    </div>
+</div>
+<script>
+    window.onload = function() {
+        const loginFailed = {{ login_failed | tojson }};  // 从后端获取 login_failed 值
+        const loginAlert = document.getElementById('login-alert');
+
+        if (loginFailed) {
+            loginAlert.style.display = 'block';  // 登录失败时显示提示框
+            console.log('登录失败提示框显示');
+
+            // 5秒后隐藏提示框
+            setTimeout(function() {
+                loginAlert.style.display = 'none';
+                console.log('提示框隐藏');
+            }, 1500);  // 5000 毫秒 = 5 秒
+        } else {
+            loginAlert.style.display = 'none';  // 否则隐藏提示框
+        }
+    }
+</script>
+
+
+<style>
+#login-alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    z-index: 1050;
+    transition: opacity 0.5s ease-in-out; /* 添加渐变效果 */
+}
+
+
+
+
+</style>
+

@@ -1,0 +1,681 @@
+{% extends "base.html" %}
+
+{% block title %}生成计划{% endblock %}
+
+{% block content %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/generate_plan.css') }}">
+    <div class="container">
+        <!-- 左边的内容 -->
+        <div class="left-section">
+            <div class="top">
+                <div class="top-text">
+                    <p class="text1">上午好 <span class="text1-1">用户名称,</span></p>
+                    <span class="text2">生成定制化饮食运动计划，与healthoney一起守护身体健康，坚持<br>就是胜利</span>
+                    <div class="goto-diet">
+                        <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#customPlanModal">去定制计划 <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <!-- Modal Structure -->
+                        <div class="modal fade" id="customPlanModal" tabindex="-1" aria-labelledby="customPlanModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="customPlanModalLabel">当前用户</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>当前用户: <span id="currentUser">{{ user.username }}</span></p>
+                                    </div>
+                                    <form method="POST" class="modal-footer" action="{{ url_for('generate_plan.send_data') }}">
+                                        <label>
+                                            今天想吃什么
+                                            <input type="text" name="want_eat">
+                                        </label>
+                                        <button type="submit" class="btn btn-primary" id="generate_button">生成</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- 顶部大框 -->
+            <div class="middle">
+                <div class="middle-left">
+                    <div class="canvas-container">
+                        <canvas id="calorie" class="charts" style="height: 230px; padding: 0;margin-bottom: 0"></canvas>
+                        <p class="calorie-text">
+                            <img src="{{ url_for('static', filename='images/燃起来了.png') }}" alt="图像"
+                                 style="height: 20px; width: 20px;margin-right: 4px">
+                            今日卡路里摄入量
+                        </p>
+                    </div>
+                </div>
+                <div class="middle-right">
+                    <div class="progress-bar-frame progress-bar-frame-热量">
+                        <p class="progress-bar-text">热量</p>
+                        <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25"
+                             aria-valuemin="0" aria-valuemax="100" style="height: 15px">
+                            <div class="progress-bar" style="width: {{ nutrient_percentages['热量'] }}%">{{ nutrient_percentages['热量'] }}%</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-frame progress-bar-frame-碳水化合物">
+                        <p class="progress-bar-text">碳水化合物</p>
+                        <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25"
+                             aria-valuemin="0" aria-valuemax="100" style="height: 15px">
+                            <div class="progress-bar" style="width: {{ nutrient_percentages['碳水化合物'] }}%">{{ nutrient_percentages['碳水化合物'] }}%</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-frame progress-bar-frame-蛋白质">
+                        <p class="progress-bar-text">蛋白质</p>
+                        <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25"
+                             aria-valuemin="0" aria-valuemax="100" style="height: 15px">
+                            <div class="progress-bar" style="width: {{ nutrient_percentages['蛋白质'] }}%">{{ nutrient_percentages['蛋白质'] }}%</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-frame progress-bar-frame-脂肪">
+                        <p class="progress-bar-text">脂肪</p>
+                        <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25"
+                             aria-valuemin="0" aria-valuemax="100" style="height: 15px">
+                            <div class="progress-bar" style="width: {{ nutrient_percentages['脂肪'] }}%">{{ nutrient_percentages['脂肪'] }}%</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-frame progress-bar-frame-膳食纤维">
+                        <p class="progress-bar-text">膳食纤维</p>
+                        <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25"
+                             aria-valuemin="0" aria-valuemax="100" style="height: 15px">
+                            <div class="progress-bar" style="width: {{ nutrient_percentages['膳食纤维'] }}%">{{ nutrient_percentages['膳食纤维'] }}%</div>
+                        </div>
+                    </div>
+                </div> <!-- 右边中框 -->
+            </div>
+            <div class="bottom">
+                <canvas id="nutrition" class="charts" style="height: 90%;width: 100%;margin-top: 20px"></canvas>
+            </div> <!-- 底部大框 -->
+        </div>
+        <!-- 右边的长框 -->
+        <div class="right-section">
+            <div style="display: flex;flex-direction: row;align-items: center;margin-bottom: 24px;margin-top: 30px">
+                <div class="d-flex flex-column align-items-center" style="width: 200px; padding: 7px 13px;margin-right: 50px">
+                    <input type="date" placeholder="选择日期" class="form-control" style="border-radius: 4px; background: #F8FAFE;" />
+                </div>
+                <button id="edit-btn" type="button" class="btn btn-dark">编辑 <i class="bi bi-pencil-square"></i></button>
+            </div>
+            <div class="diet-plan">
+                <div class="meal-rectangle" id="breakfast">
+                    <p class="meal-text">早餐</p>
+                    <div class="dish-frame"></div>
+                </div>
+                <div class="meal-rectangle" id="lunch">
+                    <p class="meal-text">午餐</p>
+                    <div class="dish-frame"></div>
+                </div>
+                <div class="meal-rectangle" id="dinner">
+                    <p class="meal-text">晚餐</p>
+                    <div class="dish-frame"></div>
+                </div>
+                <div class="meal-rectangle" id="snack">
+                    <p class="meal-text">加餐</p>
+                    <div class="dish-frame"></div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-dark" style="margin: 20px;width: 80px" id="preview-btn">预览</button>
+        </div>
+
+    </div>
+    <style>
+
+    </style>
+
+    <script src="{{ url_for('static', filename='assets/js/u-charts.js') }}"></script>
+    <script language="JavaScript">
+        var uChartsInstance = {};
+        var nutritionData = {{ nutrition_data | tojson }};
+        var calorieData = {{ calorie_data | tojson }};
+        var calorie = {{ calorie }};
+        var menuData = {{ menu_data | tojson}};
+        var nutrientPercentages={{ nutrient_percentages | tojson }}
+
+        function showNutrition(id, data) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext("2d");
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            uChartsInstance[id] = new uCharts({
+                type: "column",
+                context: ctx,
+                width: canvas.width,
+                height: canvas.height,
+                categories: data.categories,
+                series: data.series,
+                animation: true,
+                background: "#FFFFFF",
+                color: ["#34ECAA", "#F9F2B0", "#AFFFE2", "#FFC107", "#FFC107", "#FFC107", "#FFC107", "#FFC107", "#FFC107"],
+                padding: [15, 15, 0, 5],
+                enableScroll: false,
+                dataLabel: false,
+                legend: {},
+                xAxis: {
+                    disableGrid: true,
+                    rotateLabel: true,
+                    marginTop: 5
+                },
+                yAxis: {
+                    data: [
+                        {
+                            min: 0
+                        }
+                    ]
+                },
+                extra: {
+                    column: {
+                        type: "group",
+                        width: 6,
+                        activeBgColor: "#000000",
+                        activeBgOpacity: 0.08,
+                        linearType: "custom",
+                        seriesGap: 5,
+                        linearOpacity: 0.5,
+                        barBorderCircle: true,
+                        customColor: [
+                            "#6CE4FF",
+                            "#FFC107"
+                        ]
+                    }
+                }
+            });
+
+            canvas.onclick = function (e) {
+                uChartsInstance[e.target.id].touchLegend(getH5Offset(e));
+                uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+            };
+
+            canvas.onmousemove = function (e) {
+                uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+            };
+        }
+
+
+        function renderShowNutrition() {
+            showNutrition('nutrition', nutritionData);
+        }
+
+
+        function showCalorie(id, data) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext("2d");
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            uChartsInstance[id] = new uCharts({
+                type: "gauge",
+                context: ctx,
+                width: canvas.width,
+                height: canvas.height,
+                categories: data.categories,
+                series: data.series,
+                animation: true,
+                background: "#FFFFFF",
+                color: ["#1890FF", "#91CB74", "#FAC858", "#EE6666", "#73C0DE", "#3CA272", "#FC8452", "#9A60B4", "#ea7ccc"],
+                padding: undefined,
+                title: {
+                    name: calorie + "kcal",
+                    fontSize: 25,
+                    color: "#2fc25b",
+                    offsetY: 0
+                },
+                subtitle: {
+                    name: "卡路里",
+                    fontSize: 15,
+                    color: "#1890ff",
+                    offsetY: 0
+                },
+                extra: {
+                    gauge: {
+                        type: "progress",
+                        width: 20,
+                        labelColor: "#666666",
+                        startAngle: 0.75,
+                        endAngle: 0.25,
+                        startNumber: 0,
+                        endNumber: 100,
+                        labelFormat: "",
+                        splitLine: {
+                            fixRadius: -10,
+                            splitNumber: 10,
+                            width: 15,
+                            color: "#FFFFFF",
+                            childNumber: 5,
+                            childWidth: 12
+                        },
+                        pointer: {
+                            width: 24,
+                            color: "auto"
+                        }
+                    }
+                }
+            });
+            canvas.onclick = function (e) {
+                uChartsInstance[e.target.id].touchLegend(getH5Offset(e));
+                uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+            };
+            canvas.onmousemove = function (e) {
+                uChartsInstance[e.target.id].showToolTip(getH5Offset(e));
+            };
+        }
+
+
+        function renderShowCalorie() {
+            showCalorie('calorie', calorieData);
+        }
+
+
+        // 初始化菜单
+        function initMenu() {
+            const mealTypes = ["breakfast", "lunch", "dinner", "snack"];
+            mealTypes.forEach(meal => {
+                const dishFrame = document.getElementById(meal).querySelector('.dish-frame');
+                const recommendedDishes = menuData.menu[meal];
+
+                if (recommendedDishes) {
+                    Object.keys(recommendedDishes).forEach(dish => {
+                        const selectContainer = createSelectElement(dish);
+                        selectContainer.querySelector('select').disabled = true; // Disable by default
+                        dishFrame.appendChild(selectContainer);
+                    });
+                }
+            });
+        }
+
+        // 编辑按钮点击事件
+        document.getElementById('edit-btn').addEventListener('click', function() {
+            const editBtn = document.getElementById('edit-btn');
+            const selects = document.querySelectorAll('.form-select');
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+
+            // Toggle between 'btn-dark' and 'btn-outline-dark'
+            if (editBtn.classList.contains('btn-dark')) {
+                // 切换到编辑状态
+                editBtn.classList.remove('btn-dark');
+                editBtn.classList.add('btn-outline-dark');
+
+                // 启用所有 select
+                selects.forEach(select => select.disabled = false);
+
+                // 显示删除按钮
+                deleteButtons.forEach(button => {
+                    const associatedSelect = button.previousElementSibling;
+                    if (associatedSelect.value !== '') {
+                        button.style.display = 'inline-block'; // Show delete button only for non-empty selects
+                    }
+                });
+
+                // 在每个 dishFrame 的末尾添加一个新的 select 和删除按钮
+                const dishFrames = document.querySelectorAll('.dish-frame');
+                dishFrames.forEach(dishFrame => {
+                    const lastSelect = dishFrame.querySelector('.select-container:last-child select');
+                    if (lastSelect && lastSelect.value === '') {
+                        // 如果最后一个 select 是空的，则不再添加新的
+                        return;
+                    }
+
+                    // 添加一个新的 select 容器
+                    const newSelectContainer = createSelectElement();
+                    newSelectContainer.querySelector('select').disabled = false; // Enable immediately
+                    dishFrame.appendChild(newSelectContainer);
+                });
+            } else {
+                // 切换到禁用状态
+                editBtn.classList.remove('btn-outline-dark');
+                editBtn.classList.add('btn-dark');
+
+                // 禁用所有 select 并隐藏删除按钮
+                selects.forEach(select => select.disabled = true);
+                deleteButtons.forEach(button => button.style.display = 'none');
+
+                // 删除所有空的 select
+                const dishFrames = document.querySelectorAll('.dish-frame');
+                dishFrames.forEach(dishFrame => {
+                    const emptySelects = dishFrame.querySelectorAll('select');
+                    emptySelects.forEach(select => {
+                        if (select.value === '') {
+                            select.parentElement.remove();  // Remove the select container
+                        }
+                    });
+                });
+            }
+        });
+
+        // 创建 select 和 delete button 的组合容器
+        function createSelectElement(selectedValue) {
+            // 创建一个容器 div，用来存放 select 和 deleteBtn
+            const containerDiv = document.createElement('div');
+            containerDiv.classList.add('select-container');
+            containerDiv.style.display = 'flex';
+            containerDiv.style.alignItems = 'center';
+            containerDiv.style.gap = '10px'; // 给 select 和 deleteBtn 一点间距
+            containerDiv.style.width = '90%';
+
+            // 创建 select 元素
+            const select = document.createElement('select');
+            select.classList.add('form-select');
+            select.innerHTML = `<option value="">请选择</option>`;
+
+            // 动态生成 select 选项
+            Object.keys(menuData.options).forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                if (selectedValue === option) {
+                    optionElement.selected = true;
+                }
+                select.appendChild(optionElement);
+            });
+
+            // 监听 select 的 change 事件
+            select.addEventListener('change', function() {
+                if (select.value !== '') {
+                    // 只在最后一个 select 由空变为非空时添加新的 select
+                    if (!hasEmptySelect(select.parentElement.parentElement)) {
+                        addNewSelect(select.parentElement.parentElement);  // 添加到 dishFrame
+                    }
+
+                    const deleteBtn = select.nextElementSibling;
+                    if (deleteBtn) {
+                        deleteBtn.style.display = 'inline-block'; // 只有在非空 select 才显示删除按钮
+                    }
+                }
+                // 更新菜单数据并发送请求到后端
+                updateMenuAndSendRequest();
+            });
+
+            const deleteBtn = createDeleteButton(containerDiv);
+            deleteBtn.style.display = 'none'; // 默认隐藏删除按钮
+
+            // 将 select 和 deleteBtn 放入容器
+            containerDiv.appendChild(select);
+            containerDiv.appendChild(deleteBtn);
+
+            return containerDiv;
+        }
+
+        // 添加删除按钮
+        function createDeleteButton(containerDiv) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm', 'delete-btn');
+            deleteBtn.textContent = '—';
+
+            // 删除整个容器，包括 select 和按钮
+            deleteBtn.addEventListener('click', function() {
+                // 删除容器
+                containerDiv.parentElement.removeChild(containerDiv);
+
+                // 更新菜单数据并发送请求到后端
+                updateMenuAndSendRequest();
+            });
+
+            return deleteBtn;
+        }
+
+        // 更新菜单数据并发送请求到后端
+        function updateMenuAndSendRequest() {
+            const mealTypes = ["breakfast", "lunch", "dinner", "snack"];
+            const updatedMenu = {
+                menu: {},
+                options: menuData.options
+            };
+
+            mealTypes.forEach(meal => {
+                const dishFrame = document.getElementById(meal).querySelector('.dish-frame');
+                const selects = dishFrame.querySelectorAll('select');
+                const dishes = {};
+
+                selects.forEach(select => {
+                    if (select.value !== '') {
+                        dishes[select.value] = menuData.options[select.value];
+                    }
+                });
+
+                if (Object.keys(dishes).length > 0) {
+                    updatedMenu.menu[meal] = dishes;
+                }
+            });
+
+            // 发送数据到后端
+            fetch('/update-menu', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedMenu)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                // 更新前端的 nutrition_data 和 calorie_data
+                updateNutritionData(data.nutrition_data);
+                updateCalorieData(data.calorie_data);
+                updateCalorie(data.calorie);
+                updateNutrientPercentages(data.nutrient_percentages);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('更新失败');
+            });
+        }
+
+        // 添加一个空的 select 元素
+        function addNewSelect(dishFrame) {
+            const newSelectContainer = createSelectElement("");
+            dishFrame.appendChild(newSelectContainer);
+        }
+
+        // 判断是否有空的 select
+        function hasEmptySelect(dishFrame) {
+            const selects = dishFrame.querySelectorAll('select');
+            for (let select of selects) {
+                if (select.value === '') {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function saveMenuAndCloseModal(menuDetails) {
+            const mealTypes = ["breakfast", "lunch", "dinner", "snack"];
+            const updatedMenu = {
+                menu: {},
+                options: menuData.options,
+            };
+
+            mealTypes.forEach(meal => {
+                const dishes = menuDetails[meal] || [];
+                const dishObjects = {};
+
+                dishes.forEach(dish => {
+                    dishObjects[dish.name] = menuData.options[dish.name];
+                });
+
+                if (Object.keys(dishObjects).length > 0) {
+                    updatedMenu.menu[meal] = dishObjects;
+                }
+            });
+
+            // 发送数据到后端
+            fetch('/save-menu', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedMenu)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                alert('菜单已保存');
+                document.body.removeChild(document.querySelector('.preview-modal')); // 关闭弹窗
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('保存失败');
+            });
+        }
+
+        document.getElementById('preview-btn').addEventListener('click', function() {
+            const mealTypes = ["breakfast", "lunch", "dinner", "snack"];
+            const menuDetails = {};
+
+            mealTypes.forEach(meal => {
+                const dishFrame = document.getElementById(meal).querySelector('.dish-frame');
+                const selects = dishFrame.querySelectorAll('select');
+                const dishes = [];
+
+                selects.forEach(select => {
+                    if (select.value !== '') {
+                        const dishName = select.value;
+                        const dishDetails = menuData.options[dishName];
+                        dishes.push({
+                            name: dishName,
+                            ingredients: Object.keys(dishDetails),
+                            weights: Object.values(dishDetails)
+                        });
+                    }
+                });
+
+                if (dishes.length > 0) {
+                    menuDetails[meal] = dishes;
+                }
+            });
+
+            // 弹出弹窗展示菜单详细信息
+            showPreviewModal(menuDetails);
+        });
+
+
+        function showPreviewModal(menuDetails) {
+            const modal = document.createElement('div');
+            modal.className = 'preview-modal';
+            modal.style.position = 'fixed';
+            modal.style.top = '50%';
+            modal.style.left = '50%';
+            modal.style.transform = 'translate(-50%, -50%)';
+            modal.style.backgroundColor = 'white';
+            modal.style.padding = '20px';
+            modal.style.border = '1px solid #ccc';
+            modal.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+            modal.style.zIndex = '1000';
+            modal.style.minWidth = '40%';
+            modal.style.maxHeight = '80%';
+            modal.style.overflow = 'auto';
+
+            const closeButton = document.createElement('button');
+            closeButton.textContent = '关闭';
+            closeButton.style.display = 'block';
+            closeButton.style.margin = '20px auto 0';
+            closeButton.addEventListener('click', () => {
+                document.body.removeChild(modal);
+            });
+
+            const saveButton = document.createElement('button');
+            saveButton.textContent = '保存';
+            saveButton.style.display = 'block';
+            saveButton.style.margin = '20px auto 0';
+            saveButton.addEventListener('click', () => {
+                saveMenuAndCloseModal(menuDetails);
+            });
+
+            const content = document.createElement('div');
+            content.style.textAlign = 'left';
+
+            for (const meal in menuDetails) {
+                const mealSection = document.createElement('div');
+                mealSection.style.marginBottom = '20px';
+
+                const mealTitle = document.createElement('h3');
+                mealTitle.textContent = meal;
+                mealSection.appendChild(mealTitle);
+
+                menuDetails[meal].forEach(dish => {
+                    const dishSection = document.createElement('div');
+                    dishSection.style.marginLeft = '20px';
+                    dishSection.style.marginBottom = '10px';
+
+                    const dishName = document.createElement('h4');
+                    dishName.textContent = dish.name;
+                    dishSection.appendChild(dishName);
+
+                    const ingredientsList = document.createElement('ul');
+                    dish.ingredients.forEach((ingredient, index) => {
+                        const ingredientItem = document.createElement('li');
+                        ingredientItem.textContent = `${ingredient} - ${dish.weights[index]}克`;
+                        ingredientsList.appendChild(ingredientItem);
+                    });
+                    dishSection.appendChild(ingredientsList);
+
+                    mealSection.appendChild(dishSection);
+                });
+
+                content.appendChild(mealSection);
+            }
+
+            modal.appendChild(content);
+            modal.appendChild(closeButton);
+            modal.appendChild(saveButton);
+            document.body.appendChild(modal);
+        }
+
+
+        // 更新营养成分百分比
+        function updateNutrientPercentages(nutrientPercentages) {
+            const nutrientNames = ["热量", "碳水化合物", "蛋白质", "脂肪", "膳食纤维"];
+            nutrientNames.forEach(nutrient => {
+                const progressBarFrameClass = `progress-bar-frame-${nutrient}`;
+                const progressBarFrame = document.querySelector(`.${progressBarFrameClass}`);
+                if (progressBarFrame) {
+                    const progressBar = progressBarFrame.querySelector('.progress-bar');
+                    if (progressBar) {
+                        const percentage = nutrientPercentages[nutrient];
+                        progressBar.style.width = `${percentage}%`;
+                        progressBar.textContent = `${percentage}%`;
+                    } else {
+                        console.warn(`Progress bar for ${nutrient} not found.`);
+                    }
+                } else {
+                    console.warn(`Progress bar frame for ${nutrient} not found.`);
+                }
+            });
+        }
+
+
+        // 更新 nutrition_data
+        function updateNutritionData(nutritionData) {
+            uChartsInstance['nutrition'].updateData({
+                categories: nutritionData.categories,
+                series: nutritionData.series
+            });
+        }
+
+        // 更新 calorie_data
+        function updateCalorieData(calorieData) {
+            uChartsInstance['calorie'].updateData({
+                categories: calorieData.categories,
+                series: calorieData.series
+            });
+        }
+
+        // 更新 calorie 变量
+        function updateCalorie(calorie) {
+            // 更新 calorie 变量
+            window.calorie = calorie;
+            // 更新卡路里视图
+            showCalorie('calorie', calorieData);
+        }
+
+        // 初始化页面
+        initMenu();
+
+        // 初始化图表
+        window.onload = function () {
+            renderShowNutrition();
+            renderShowCalorie();
+        };
+    </script>
+{% endblock %}

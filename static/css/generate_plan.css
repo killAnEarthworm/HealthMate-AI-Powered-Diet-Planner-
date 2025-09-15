@@ -1,0 +1,209 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .top {
+            position: relative;
+            height: 207px;
+            background-image: url("../images/background.png");
+            border-radius: 10px;
+            background-size: cover; /* 背景图像按比例填充 */
+            background-position: center; /* 背景居中显示 */
+        }
+
+        .top-text {
+            margin-left: 50px;
+            margin-top: 35px;
+        }
+
+        .text1 {
+            color: var(--white_S, #FFF);
+            font-feature-settings: 'liga' off, 'clig' off;
+            font-family: Poppins;
+            font-size: 26px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 1; /* 调整行高，1.5 倍的行间距 */
+        }
+
+        .text2 {
+            color: var(--white_S, #FFF);
+            font-feature-settings: 'liga' off, 'clig' off;
+            font-family: Poppins;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 1.5; /* 同样设置合理的行高 */
+        }
+
+        .text1-1 {
+            color: #F9F2B0;
+        }
+
+        .btn-link {
+            color: #F9F2B0;
+            font-feature-settings: 'liga' off, 'clig' off;
+            font-family: Poppins;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: 20px; /* 200% */
+            padding: 0; /* 移除按钮的默认内边距 */
+            margin-top: 20px;
+        }
+
+        .btn-link:hover {
+            color: #CBC16F;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            padding: 10px;
+        }
+
+        .left-section {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 10px;
+        }
+
+        .bottom, .middle-right, .middle-left, .inner-section {
+            background-color: #ddd;
+            border-radius: 26px;
+            background: var(--white_S, #FFF);
+            box-shadow: 0px 1px 50px 0px rgba(0, 0, 0, 0.08);
+        }
+
+        .middle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .middle-left {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* 垂直排列canvas和文字 */
+            height: 250px; /* 固定高度 */
+            width: 30%;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 水平居中对齐 */
+            text-align: center;
+        }
+
+        .calorie-text {
+            display: inline-flex;
+            align-items: center; /* 确保图像和文本垂直居中 */
+            margin-top: -25px;
+        }
+
+        .middle-right {
+            flex-grow: 1;
+            height: 250px; /* 确保高度一致 */
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+
+        .progress-bar-frame {
+            width: 85%;
+        }
+
+        .progress-bar-text {
+            color: var(--Black_S, #000);
+            font-family: "DM Sans";
+            font-size: 15px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 0;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            background-color: var(--light-green, #22CB8E);
+        }
+
+        .bottom {
+            height: 49%;
+        }
+
+        .charts {
+            width: 100%; /* 让canvas的宽度继承父元素 */
+            height: 100%; /* 让canvas的高度继承父元素 */
+            display: block;
+        }
+
+        .right-section {
+            width: 382px;
+            height: 100%;
+            flex-shrink: 0;
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            border-radius: 26px;
+            background: var(--white_S, #FFF);
+            /* shadow */
+            box-shadow: 0px 1px 50px 0px rgba(0, 0, 0, 0.08);
+        }
+
+        .diet-plan{
+            display: flex;
+            width: 348px;
+            flex-direction: column;
+            align-items: center;
+            gap: 26px;
+        }
+        .meal-rectangle{
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+            align-self: stretch;
+        }
+
+        .meal-text{
+            color: #263257;
+            /* H2 Medical */
+            font-family: Poppins;
+            font-size: 20px;
+            font-style: normal;
+            font-weight: 500;
+            letter-spacing: 0.4px;
+            width: 164px;
+            height: 18px;
+            margin-bottom: 5px;
+        }
+
+        .dish-frame{
+            display: flex;
+            padding: 10px;
+            width: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border-radius: 5px;
+            background: #F8FAFE;
+        }
+
+        .form-select:disabled{
+            background-color: #F8FAFE;
+            border: none;
+            -webkit-appearance: none; /* 针对 Safari 和 Chrome */
+            -moz-appearance: none;    /* 针对 Firefox */
+            appearance: none;         /* 通用 */
+            background-image: none;   /* 移除背景图标（箭头） */
+        }
+
