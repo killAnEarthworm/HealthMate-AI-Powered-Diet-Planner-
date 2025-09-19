@@ -142,7 +142,7 @@ Healthoney——基于AIGC的糖尿病健康管理平台主要由以下七大模
 
 功能描述：数据展示功能用于实时展示用户的生理指标、饮食记录和运动情况。用户可以通过可视化图表直观了解自己的健康状态。
 
-![dashboard.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7opoyAPMTuokRo4zhdTFP08wrEMMkgADJwAC84pBVnLnpC765W-4NgQ.png)
+![dashboard.png](https://youke1.picui.cn/s1/2025/09/19/68ccd8e2a4676.png)
 
 ### 录入用户生理指标功能
 
@@ -152,7 +152,7 @@ Healthoney——基于AIGC的糖尿病健康管理平台主要由以下七大模
 
 1.  点击“录入每日生理指标”
 2.  输入要修改的生理指标，点击提交，数据更新成功。
-![dashboard_insert.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7q5oyAQ6YR8KG5PyI8M7DheWvzWwkAACJCcAAvOKQVYkqC5A-NEqyzYE.png)
+![dashboard_insert.png](https://youke1.picui.cn/s1/2025/09/19/68ccd8e2c8bb1.png)
 
 ## 生成计划模块
 功能描述：自动获取已录入的生理指标构建提示词，生成定制化的饮食计划，可输入饮食偏好。
