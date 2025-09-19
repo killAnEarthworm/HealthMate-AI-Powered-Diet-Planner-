@@ -156,10 +156,10 @@ Healthoney——基于AIGC的糖尿病健康管理平台主要由以下七大模
 
 ## 生成计划模块
 功能描述：自动获取已录入的生理指标构建提示词，生成定制化的饮食计划，可输入饮食偏好。
-![diet_generate.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7udoyATkacNELExhhWtynC4qHyBVLwACXScAAvOKQVZ96-vRavjKGjYE.png)
+![diet.png](https://youke1.picui.cn/s1/2025/09/19/68ccd8e327835.png)
 
 生成的计划可编辑，左侧可视化面板会自动计算当前计划的营养成分摄入状况
-![diet.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7sZoyASGVfYaZCzS2wzVBB7YrwhbxgACPCcAAvOKQVa_BuDfMFeCizYE.png)
+![diet_generate.png](https://youke1.picui.cn/s1/2025/09/19/68ccd8e71e373.png)
 
 
 
@@ -175,7 +175,7 @@ Healthoney——基于AIGC的糖尿病健康管理平台主要由以下七大模
 
 2.点击“查询”按钮，查询成功，数据显示在页面上。
 
-![database.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7yFoyAWXcdndtFqT0HJjXYrMNQW-EQACmScAAvOKQVZncrjKIr9MgjYE.png)
+![database.png](https://youke1.picui.cn/s1/2025/09/19/68ccd8e2b4b16.png)
 ## 个人中心模块
 
 ### 用户档案管理功能
@@ -187,7 +187,7 @@ Healthoney——基于AIGC的糖尿病健康管理平台主要由以下七大模
 1.  点击用户档案
 2.  输入要修改的信息，点击保存，数据更新完成。
 
-![personal.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7yxoyAW8KqSWMOXmfwJqqMNEMLNoTQACpScAAvOKQVasBzt-QAzQLzYE.png)
+![personal.png](https://youke1.picui.cn/s1/2025/09/19/68ccd8e2c56d9.png)
 ### 修改密码功能
 
 #### 功能描述：用户可以通过此功能修改账户密码
@@ -219,7 +219,7 @@ Healthoney——基于AIGC的糖尿病健康管理平台主要由以下七大模
 
 1.  点击“登陆按钮”，成功登陆，进入数据看板。
 
-![login.png](https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEB7zloyAXlA9ZCr8Ta9WK-xlY9XtfD7wACsicAAvOKQVbpEj7j5vY-MTYE.png)
+![login.png](https://youke1.picui.cn/s1/2025/09/19/68ccd8e727aec.png)
 
 ### 注册功能
 
