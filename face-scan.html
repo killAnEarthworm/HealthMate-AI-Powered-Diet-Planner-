@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>面部扫描</title>
+
+  <!--
+    所有资源均从 jsDelivr CDN 加载（国内可访问）
+    @mediapipe/face_mesh npm 包内包含 WASM + 模型文件，无需单独托管
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/face_mesh.js" crossorigin="anonymous"></script>
+  <!-- 微信 JSSDK，用于扫描完成后跳回小程序 -->
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --teal:      #00dcb4;
+      --teal-dark: #00c4a0;
+      --bg:        #0f172a;
+      --panel-bg:  rgba(15, 23, 42, 0.95);
+      --text:      #ffffff;
+      --sub:       #94a3b8;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* ── 摄像头 & Canvas ── */
+    #video {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* 自拍镜像 */
+    }
+    #canvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      transform: scaleX(-1); /* 与 video 同步镜像，使关键点对齐 */
+    }
+
+    /* ── 顶部徽章 ── */
+    #face-badge {
+      position: absolute;
+      top: max(56px, calc(env(safe-area-inset-top) + 56px));
+      left: 50%; transform: translateX(-50%);
+      background: rgba(12, 192, 181, 0.85);
+      color: #fff; font-size: 13px; font-weight: 500;
+      padding: 6px 20px; border-radius: 9999px;
+      backdrop-filter: blur(8px);
+      white-space: nowrap;
+      z-index: 10;
+      transition: background 0.3s;
+    }
+    #face-badge.no-face { background: rgba(255,255,255,0.15); }
+
+    /* ── 加载遮罩 ── */
+    #loading {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 14px;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 30;
+    }
+    .spinner {
+      width: 52px; height: 52px;
+      border: 4px solid rgba(12, 192, 181, 0.2);
+      border-top-color: #0cc0b5;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-text  { color: var(--text); font-size: 14px; font-weight: 500; }
+    #loading-sub   { color: var(--sub); font-size: 12px; text-align: center; padding: 0 32px; line-height: 1.6; }
+
+    /* ── 错误遮罩 ── */
+    #error-mask {
+      position: absolute; inset: 0;
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px; padding: 32px;
+      background: var(--panel-bg);
+      z-index: 30;
+    }
+    #error-mask .icon  { font-size: 48px; }
+    #error-mask h3     { color: var(--text); font-size: 18px; }
+    #error-mask p      { color: var(--sub); font-size: 13px; text-align: center; line-height: 1.6; }
+    .retry-btn {
+      margin-top: 8px; padding: 12px 32px;
+      background: linear-gradient(to right, var(--teal), var(--teal-dark));
+      border: none; border-radius: 12px;
+      color: #fff; font-size: 15px; font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* ── 底部控制区 ── */
+    #controls {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 20px 24px;
+      padding-bottom: calc(32px + env(safe-area-inset-bottom));
+      background: linear-gradient(to top, var(--panel-bg) 60%, transparent);
+      z-index: 10;
+    }
+    #status-text {
+      color: var(--text); font-size: 17px; font-weight: 500;
+      text-align: center; margin-bottom: 2px;
+    }
+    #status-sub {
+      color: var(--sub); font-size: 12px;
+      text-align: center; margin-bottom: 20px;
+    }
+
+    /* 进度条 */
+    #progress-wrap { display: none; margin-bottom: 16px; }
+    #progress-label { color: var(--teal); font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+    #progress-track {
+      background: #1e293b; border-radius: 9999px;
+      height: 8px; overflow: visible; position: relative;
+    }
+    #progress-fill {
+      height: 100%; border-radius: 9999px;
+      background: linear-gradient(to right, var(--teal), var(--teal-dark));
+      width: 0%; transition: width 0.08s linear;
+      position: relative;
+    }
+    #progress-fill::after {
+      content: '';
+      position: absolute; right: 0; top: 50%;
+      transform: translate(50%, -50%);
+      width: 14px; height: 14px;
+      background: #fff; border: 2px solid var(--teal);
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(12, 192, 181, 0.6);
+    }
+
+    /* 开始按钮 */
+    #scan-btn {
+      width: 100%; padding: 16px 0;
+      background: linear-gradient(to right, var(--teal), var(--teal-dark));
+      border: none; border-radius: 16px;
+      color: #fff; font-size: 18px; font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0, 220, 180, 0.4);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    #scan-btn:disabled { opacity: 0.4; pointer-events: none; }
+    #scan-btn:active   { transform: scale(0.98); opacity: 0.85; }
+    #scan-btn.hidden   { display: none; }
+
+    /* ── 成功遮罩 ── */
+    #success {
+      position: absolute; inset: 0;
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 14px; padding: 32px;
+      background: var(--panel-bg);
+      z-index: 20;
+    }
+    #success .check-ring {
+      width: 72px; height: 72px;
+      background: rgba(0, 220, 180, 0.15);
+      border: 2px solid var(--teal);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px;
+    }
+    #success h2  { color: var(--text); font-size: 22px; }
+    #success p   { color: var(--sub); font-size: 14px; text-align: center; line-height: 1.6; }
+    #back-btn {
+      margin-top: 8px; padding: 14px 40px;
+      background: linear-gradient(to right, var(--teal), var(--teal-dark));
+      border: none; border-radius: 14px;
+      color: #fff; font-size: 16px; font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 220, 180, 0.35);
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="canvas"></canvas>
+
+  <div id="face-badge" class="no-face">请正视前方</div>
+
+  <!-- 加载中 -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <div id="loading-text">正在加载模型...</div>
+    <div id="loading-sub">首次加载约需 10~20 秒（约 8 MB），请保持网络连接</div>
+  </div>
+
+  <!-- 错误提示 -->
+  <div id="error-mask">
+    <div class="icon">⚠️</div>
+    <h3 id="error-title">出现错误</h3>
+    <p id="error-msg"></p>
+    <button class="retry-btn" onclick="location.reload()">重新加载</button>
+  </div>
+
+  <!-- 底部控制 -->
+  <div id="controls">
+    <div id="status-text">请正视前方，保持面部居中</div>
+    <div id="status-sub">MediaPipe FaceMesh · 468 关键点</div>
+
+    <div id="progress-wrap">
+      <div id="progress-label">0% 扫描中...</div>
+      <div id="progress-track"><div id="progress-fill"></div></div>
+    </div>
+
+    <button id="scan-btn" disabled>
+      <span>📷</span><span>开始扫描</span>
+    </button>
+  </div>
+
+  <!-- 扫描完成 -->
+  <div id="success">
+    <div class="check-ring">✓</div>
+    <h2>扫描完成</h2>
+    <p id="success-msg">正在上传数据，请稍候...</p>
+    <button id="back-btn" onclick="goBack()">返回小程序</button>
+  </div>
+
+  <script>
+  // ════════════════════════════════════════════════════════════
+  //  配置区 ── 根据实际情况修改以下常量
+  // ════════════════════════════════════════════════════════════
+  const CONFIG = {
+    // 后端保存接口（替换为真实地址）
+    // 请求格式见下方 buildPayload()
+    API_URL: 'https://your-server.com/api/face-scan/save',
+
+    // 扫描完成后跳转的小程序页面路径
+    MP_REPORT_PAGE: '/pages/facial-scan-report/index',
+
+    // 扫描时长（毫秒）
+    SCAN_DURATION_MS: 5000,
+
+    // 采帧间隔（毫秒）：5000 / 200 = 约 25 帧
+    FRAME_INTERVAL_MS: 200,
+
+    // MediaPipe face_mesh 资源路径（全部走 jsDelivr，国内可访问）
+    LOCATE_FILE: (file) =>
+      `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/${file}`,
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  从 URL 参数读取用户信息
+  //  小程序端生成 URL 时需携带这两个参数：
+  //    ?userId=xxx&sessionId=yyy
+  // ════════════════════════════════════════════════════════════
+  const params    = new URLSearchParams(location.search)
+  const userId    = params.get('userId')    || 'mock_user_001'          // TODO: 替换为真实 userId
+  const sessionId = params.get('sessionId') || `session_${Date.now()}`  // 扫描会话 ID
+
+  // ════════════════════════════════════════════════════════════
+  //  DOM 引用
+  // ════════════════════════════════════════════════════════════
+  const video        = document.getElementById('video')
+  const canvas       = document.getElementById('canvas')
+  const ctx          = canvas.getContext('2d')
+  const loadingEl    = document.getElementById('loading')
+  const loadingText  = document.getElementById('loading-text')
+  const errorMask    = document.getElementById('error-mask')
+  const errorTitle   = document.getElementById('error-title')
+  const errorMsg     = document.getElementById('error-msg')
+  const faceBadge    = document.getElementById('face-badge')
+  const statusText   = document.getElementById('status-text')
+  const statusSub    = document.getElementById('status-sub')
+  const progressWrap = document.getElementById('progress-wrap')
+  const progressLbl  = document.getElementById('progress-label')
+  const progressFill = document.getElementById('progress-fill')
+  const scanBtn      = document.getElementById('scan-btn')
+  const successEl    = document.getElementById('success')
+  const successMsg   = document.getElementById('success-msg')
+  const backBtn      = document.getElementById('back-btn')
+
+  // ════════════════════════════════════════════════════════════
+  //  运行时状态
+  // ════════════════════════════════════════════════════════════
+  let faceMesh        = null
+  let isModelReady    = false   // 第一帧推理完成后置 true
+  let isScanning      = false
+  let faceDetected    = false
+  let collectedFrames = []      // Array<{ timestamp, landmarks[] }>
+  let lastFrameTime   = 0
+  let scanInterval    = null
+  let isSending       = false   // 防止 send() 重叠
+
+  // ════════════════════════════════════════════════════════════
+  //  面部连接索引（用于 Canvas 绘制）
+  // ════════════════════════════════════════════════════════════
+  const CONNECTIONS = {
+    oval:    [[10,338],[338,297],[297,332],[332,284],[284,251],[251,389],[389,356],[356,454],[454,323],[323,361],[361,288],[288,397],[397,365],[365,379],[379,378],[378,400],[400,377],[377,152],[152,148],[148,176],[176,149],[149,150],[150,136],[136,172],[172,58],[58,132],[132,93],[93,234],[234,127],[127,162],[162,21],[21,54],[54,103],[103,67],[67,109],[109,10]],
+    leftEye: [[263,249],[249,390],[390,373],[373,374],[374,380],[380,381],[381,382],[382,362],[362,263],[263,466],[466,388],[388,387],[387,386],[386,385],[385,384],[384,398],[398,362]],
+    rightEye:[[33,7],[7,163],[163,144],[144,145],[145,153],[153,154],[154,155],[155,133],[133,33],[133,173],[173,157],[157,158],[158,159],[159,160],[160,161],[161,246],[246,33]],
+    lBrow:   [[276,283],[283,282],[282,295],[295,285],[300,293],[293,334],[334,296],[296,336]],
+    rBrow:   [[46,53],[53,52],[52,65],[65,55],[70,63],[63,105],[105,66],[66,107]],
+    lips:    [[61,146],[146,91],[91,181],[181,84],[84,17],[17,314],[314,405],[405,321],[321,375],[375,291],[61,185],[185,40],[40,39],[39,37],[37,0],[0,267],[267,269],[269,270],[270,409],[409,291]],
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  Canvas 绘制
+  // ════════════════════════════════════════════════════════════
+  function drawConnectors(landmarks, pairs, color, lineWidth) {
+    ctx.strokeStyle = color
+    ctx.lineWidth   = lineWidth
+    ctx.beginPath()
+    for (const [a, b] of pairs) {
+      const la = landmarks[a], lb = landmarks[b]
+      if (!la || !lb) continue
+      ctx.moveTo(la.x * canvas.width,  la.y * canvas.height)
+      ctx.lineTo(lb.x * canvas.width,  lb.y * canvas.height)
+    }
+    ctx.stroke()
+  }
+
+  function drawMesh(landmarks) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    drawConnectors(landmarks, CONNECTIONS.oval,     '#00DCB4',           2.0)
+    drawConnectors(landmarks, CONNECTIONS.leftEye,  '#00DCB4',           1.5)
+    drawConnectors(landmarks, CONNECTIONS.rightEye, '#00DCB4',           1.5)
+    drawConnectors(landmarks, CONNECTIONS.lBrow,    'rgba(0,220,180,.6)',1.5)
+    drawConnectors(landmarks, CONNECTIONS.rBrow,    'rgba(0,220,180,.6)',1.5)
+    drawConnectors(landmarks, CONNECTIONS.lips,     'rgba(0,220,180,.7)',1.5)
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  MediaPipe 结果回调
+  // ════════════════════════════════════════════════════════════
+  function onResults(results) {
+    // 第一次拿到结果 → 模型加载完毕
+    if (!isModelReady) {
+      isModelReady = true
+      loadingEl.style.display  = 'none'
+      scanBtn.disabled         = false
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    const hasLandmarks = results.multiFaceLandmarks?.length > 0
+    faceDetected = hasLandmarks
+    faceBadge.textContent = hasLandmarks ? '✓ 面部已识别' : '请正视前方'
+    faceBadge.classList.toggle('no-face', !hasLandmarks)
+
+    if (!hasLandmarks) return
+
+    const landmarks = results.multiFaceLandmarks[0] // 468 个归一化关键点 { x, y, z }
+    drawMesh(landmarks)
+
+    // 采帧
+    const now = Date.now()
+    if (isScanning && now - lastFrameTime >= CONFIG.FRAME_INTERVAL_MS) {
+      lastFrameTime = now
+      collectedFrames.push({
+        timestamp: now,
+        landmarks: landmarks.map(({ x, y, z }) => ({ x, y, z })),
+      })
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  推理循环（requestAnimationFrame）
+  // ════════════════════════════════════════════════════════════
+  async function processFrame() {
+    if (video.readyState >= 2 && !isSending) {
+      isSending = true
+      try {
+        await faceMesh.send({ image: video })
+      } catch (e) {
+        console.warn('[FaceScan] send error:', e)
+      } finally {
+        isSending = false
+      }
+    }
+    requestAnimationFrame(processFrame)
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  初始化
+  // ════════════════════════════════════════════════════════════
+  async function init() {
+    try {
+      // 1. 申请摄像头
+      loadingText.textContent = '正在申请摄像头权限...'
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false,
+      })
+      video.srcObject = stream
+      await new Promise((resolve) => { video.onloadedmetadata = resolve })
+
+      // 2. 同步 Canvas 分辨率
+      canvas.width  = video.videoWidth
+      canvas.height = video.videoHeight
+
+      // 3. 创建 FaceMesh（懒加载 WASM + 模型，首帧推理时触发下载）
+      loadingText.textContent = '正在加载 MediaPipe 模型...'
+      faceMesh = new FaceMesh({ locateFile: CONFIG.LOCATE_FILE })
+      faceMesh.setOptions({
+        maxNumFaces:            1,
+        refineLandmarks:        false, // false = 468 点；true = 478 点（含虹膜）
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence:  0.5,
+      })
+      faceMesh.onResults(onResults)
+
+      // 4. 启动推理循环（第一帧会触发 WASM 下载，完成后 onResults 被调用）
+      requestAnimationFrame(processFrame)
+
+    } catch (err) {
+      showError(
+        err.name === 'NotAllowedError' ? '摄像头权限被拒绝' : '初始化失败',
+        err.name === 'NotAllowedError'
+          ? '请在浏览器设置中允许本页面访问摄像头，然后刷新重试。'
+          : err.message,
+      )
+    }
+  }
+
+  function showError(title, msg) {
+    loadingEl.style.display    = 'none'
+    errorMask.style.display    = 'flex'
+    errorTitle.textContent     = title
+    errorMsg.textContent       = msg
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  扫描流程
+  // ════════════════════════════════════════════════════════════
+  function startScan() {
+    if (!isModelReady || isScanning) return
+    isScanning      = true
+    collectedFrames = []
+    lastFrameTime   = 0
+
+    scanBtn.classList.add('hidden')
+    progressWrap.style.display = 'block'
+    statusText.textContent     = '正在扫描，请保持面部不动...'
+    statusSub.textContent      = '保持正视，光线均匀效果更好'
+
+    const start = Date.now()
+    scanInterval = setInterval(() => {
+      const pct = Math.min(100, Math.round((Date.now() - start) / CONFIG.SCAN_DURATION_MS * 100))
+      progressFill.style.width   = `${pct}%`
+      progressLbl.textContent    = `${pct}% 扫描中...`
+      if (pct >= 100) {
+        clearInterval(scanInterval)
+        finishScan()
+      }
+    }, 60)
+  }
+
+  async function finishScan() {
+    isScanning = false
+    statusText.textContent = '扫描完成，正在处理...'
+
+    successEl.style.display = 'flex'
+    successMsg.textContent  = `已采集 ${collectedFrames.length} 帧数据，正在上传...`
+
+    await uploadResults()
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  构造上传数据
+  // ════════════════════════════════════════════════════════════
+  function buildPayload() {
+    return {
+      userId,
+      sessionId,
+      scanTime:   new Date().toISOString(),
+      frameCount: collectedFrames.length,
+      // 每帧包含 468 个关键点，每个关键点 { x, y, z }（归一化到 [0,1]）
+      frames: collectedFrames,
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  上传结果
+  // ════════════════════════════════════════════════════════════
+  async function uploadResults() {
+    const payload = buildPayload()
+
+    try {
+      // ── TODO: 取消注释以启用真实上传 ──────────────────────────
+      // const resp = await fetch(CONFIG.API_URL, {
+      //   method:  'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body:    JSON.stringify(payload),
+      // })
+      // if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${await resp.text()}`)
+
+      // ── 开发阶段：模拟上传（打印到控制台）─────────────────────
+      console.log('[FaceScan] 扫描结果（模拟上传，未发送）')
+      console.log('  userId:     ', payload.userId)
+      console.log('  sessionId:  ', payload.sessionId)
+      console.log('  frameCount: ', payload.frameCount)
+      console.log('  首帧关键点数:', payload.frames[0]?.landmarks?.length)
+      console.log('  完整 payload:', payload)
+      await new Promise((r) => setTimeout(r, 600)) // 模拟网络延迟
+      // ── 模拟结束 ────────────────────────────────────────────
+
+      onUploadSuccess()
+
+    } catch (err) {
+      console.error('[FaceScan] 上传失败:', err)
+      successMsg.textContent = `上传失败：${err.message}`
+      backBtn.textContent    = '重试上传'
+      backBtn.style.display  = 'block'
+      backBtn.onclick        = async () => {
+        backBtn.style.display  = 'none'
+        successMsg.textContent = '正在重新上传...'
+        backBtn.onclick        = goBack
+        backBtn.textContent    = '返回小程序'
+        await uploadResults()
+      }
+    }
+  }
+
+  function onUploadSuccess() {
+    successMsg.textContent = '上传成功！'
+    backBtn.style.display  = 'block'
+    // 尝试自动跳回小程序（需在微信内打开且小程序在后台运行）
+    tryNavigateBack(/* auto */ true)
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  返回小程序
+  // ════════════════════════════════════════════════════════════
+  function tryNavigateBack(auto = false) {
+    try {
+      if (typeof wx !== 'undefined' && wx.miniProgram) {
+        wx.miniProgram.navigateTo({
+          url:  `${CONFIG.MP_REPORT_PAGE}?sessionId=${encodeURIComponent(sessionId)}`,
+          fail: () => {
+            // navigateTo 失败时（如页面栈已满）尝试 redirectTo
+            wx.miniProgram.redirectTo({
+              url:  `${CONFIG.MP_REPORT_PAGE}?sessionId=${encodeURIComponent(sessionId)}`,
+              fail: () => {
+                successMsg.textContent = '扫描完成！请手动返回小程序查看报告。'
+              },
+            })
+          },
+        })
+      } else if (!auto) {
+        // 非微信环境手动点击时给提示
+        alert('请在微信内打开此页面以自动返回小程序。\n\n扫描数据已保存，会话 ID：' + sessionId)
+      } else {
+        successMsg.textContent = '扫描完成！请手动返回小程序查看报告。'
+      }
+    } catch (e) {
+      console.warn('[FaceScan] 跳转小程序失败:', e)
+      successMsg.textContent = '扫描完成！请手动返回小程序查看报告。'
+    }
+  }
+
+  function goBack() { tryNavigateBack(false) }
+
+  // ════════════════════════════════════════════════════════════
+  //  事件绑定 & 启动
+  // ════════════════════════════════════════════════════════════
+  scanBtn.addEventListener('click', startScan)
+  init()
+  </script>
+</body>
+</html>
